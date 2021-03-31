@@ -14,7 +14,5 @@ const msgSchema = new Schema({
   test: new testSchema.SchemaRef("test", { isArray: false }),
 });
 
-export default {
-  Model: msgSchema.Model("message").Model,
-  SchemaRef: msgSchema.SchemaRef,
-};
+export const MessageModel = msgSchema.Model("message");
+export const MessageSchemaRef = msgSchema.SchemaRef;

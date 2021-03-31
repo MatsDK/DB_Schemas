@@ -27,6 +27,7 @@ export const checkModelRecursive = (
 
   schemaKeys.forEach((schemaKey) => {
     if (isSchemaRef(schema, schema[schemaKey])) {
+      // console.log(schema[schemaKey].isArray);
       const newSchemaObj: any = new Object(doc[schemaKey]);
       Object.keys(schema[schemaKey].schema).forEach((key: string) => {
         if (typeof newSchemaObj[key] === "undefined")

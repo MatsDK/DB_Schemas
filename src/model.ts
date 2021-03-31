@@ -1,10 +1,15 @@
 import { checkModelRecursive } from "./utils/checkModel";
 
 export class Model {
-  createNewModel: any;
+  Model: any;
+  schema: any;
+  modelName: string;
 
   constructor(schema: any, modelName: string) {
-    this.createNewModel = class newModel {
+    this.modelName = modelName;
+    this.schema = schema;
+
+    this.Model = class newModel {
       doc: any;
       schema: any;
       modelName: string;
@@ -56,13 +61,12 @@ export class Model {
           this.modelName
         );
         if (checkModel.err) return console.error(checkModel.err);
-
         console.log(checkModel.doc);
       };
     };
   }
 
   findOne() {
-    console.log("findOne");
+    console.log(this.modelName);
   }
 }

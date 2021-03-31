@@ -1,4 +1,5 @@
 import { Model } from "./model";
+import { ModelReturnProps } from "./SchemaInterfaces";
 import { SchemaRef } from "./SchemaRef";
 
 export class Schema {
@@ -10,21 +11,17 @@ export class Schema {
 
     this.obj = doc;
     this.SchemaRef = new SchemaRef(doc).newSchemaRef;
-
-    // Object.keys(doc).forEach((x) => {
-    //   if (
-    //     doc[x].constructor.name ===
-    //     new this.SchemaRef({ isArray: false }).constructor.name
-    //   ) {
-    //     // console.log(doc[x], "is Schemaref");
-    //   }
-    // });
+    this.#checkSchema();
   }
 
-  Model(ModelName: string) {
-    if (typeof ModelName !== "string") throw "enter valid name";
-    const newModel = new Model(this.obj, ModelName);
+  #checkSchema = () => {
+    Object.keys(this.obj).forEach((x) => {
+      if (x === "_save") throw "can't have property _save on Schema";
+    });
+  };
 
-    return { Model: newModel.createNewModel, findOne: newModel.findOne };
+  Model(ModelName: string): ModelReturnProps {
+    if (typeof ModelName !== "string") throw "enter valid name";
+    return new Model(this.obj, ModelName);
   }
 }
