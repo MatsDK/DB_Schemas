@@ -2,6 +2,7 @@ import next from "next";
 import express, { Application, Request, Response } from "express";
 import bodyParser from "body-parser";
 import cors from "cors";
+import apiRouter from "./apiRouter";
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
@@ -12,6 +13,7 @@ app
   .then(() => {
     const server: Application = express();
 
+    server.use("/api", apiRouter);
     server.use(bodyParser());
     server.use(cors());
 
