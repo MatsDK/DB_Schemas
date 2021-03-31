@@ -14,15 +14,51 @@ export class Model {
         this.modelName = modelName;
         this.schema = schema;
         this.#checkDocument();
+
+        const returnObj: any = new Object({ ...doc });
+
+        Object.defineProperties(returnObj, {
+          _save: {
+            enumerable: false,
+            value: this.#_save,
+          },
+          schema: {
+            enumerable: false,
+            value: this.schema,
+          },
+          doc: {
+            enumerable: false,
+            value: this.doc,
+          },
+          modelName: {
+            enumerable: false,
+            value: this.modelName,
+          },
+        });
+
+        return returnObj;
       }
 
       #checkDocument = () => {
-        this.doc = checkModelRecursive(this.schema, this.doc, this.modelName);
+        const newDoc = checkModelRecursive(
+          this.schema,
+          this.doc,
+          this.modelName
+        );
+        if (newDoc.err) console.error(newDoc.err);
+        this.doc = newDoc.doc;
       };
 
-      save() {
-        console.log("save");
-      }
+      #_save = () => {
+        const checkModel = checkModelRecursive(
+          this.schema,
+          this.doc,
+          this.modelName
+        );
+        if (checkModel.err) return console.error(checkModel.err);
+
+        console.log(checkModel.doc);
+      };
     };
   }
 

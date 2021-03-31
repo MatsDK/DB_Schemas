@@ -7,12 +7,14 @@ const userSchema = new Schema({
   message: new msgSchema.SchemaRef("message", { isArray: false }),
 });
 
-const { Model: userModel } = userSchema.Model("user");
+const { Model: userModel, ...userModelFuncs } = userSchema.Model("user");
 
 const newUser = new userModel({
   name: "test",
   isVerified: "test",
-  message: { name: "test" },
+  message: { text: "test211221212121", test: undefined },
 });
 
-console.log(newUser.doc);
+newUser.message.name = "mate";
+newUser.message.test = { date: "test" };
+newUser._save();

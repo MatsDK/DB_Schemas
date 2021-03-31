@@ -24,6 +24,7 @@ export class Schema {
   Model(ModelName: string) {
     if (typeof ModelName !== "string") throw "enter valid name";
     const newModel = new Model(this.obj, ModelName);
+
     return { Model: newModel.createNewModel, findOne: newModel.findOne };
   }
 }
