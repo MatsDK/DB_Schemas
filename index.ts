@@ -1,5 +1,5 @@
 import { Schema } from "./src/schema";
-import { MessageModel, MessageSchemaRef } from "./SchemaTest";
+import { MessageSchemaRef } from "./SchemaTest";
 
 const userSchema = new Schema({
   name: true,
@@ -10,14 +10,14 @@ const userSchema = new Schema({
 const userModel = userSchema.Model("user");
 
 const newUser = new userModel.Model({
-  name: "test",
-  isVerified: "test",
-  message: { text: "test", test: undefined },
+  name: "value",
+  isVerified: "value",
+  message: { text: "value", test: undefined },
 });
 
-const test = new MessageModel.Model({ name: "test" });
-test._save();
+// const test = new MessageModel.Model({ name: "tesvaluet" });
+// test._save();
 
-newUser.message.name = "test";
-newUser.message.test = { date: "test" };
+newUser.message.name = "value";
+newUser.message.test = { date: "value" };
 newUser._save();

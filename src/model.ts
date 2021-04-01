@@ -1,4 +1,5 @@
-import { checkModelRecursive } from "./utils/checkModel";
+import axios from "axios";
+import { checkModelRecursive, constructObj } from "./utils/checkModel";
 
 export class Model {
   Model: any;
@@ -18,7 +19,7 @@ export class Model {
         this.doc = doc;
         this.modelName = modelName;
         this.schema = schema;
-        this.#checkDocument();
+        this.#createDoc();
 
         const returnObj: any = new Object({ ...doc });
 
@@ -44,14 +45,8 @@ export class Model {
         return returnObj;
       }
 
-      #checkDocument = () => {
-        const newDoc = checkModelRecursive(
-          this.schema,
-          this.doc,
-          this.modelName
-        );
-        if (newDoc.err) console.error(newDoc.err);
-        this.doc = newDoc.doc;
+      #createDoc = () => {
+        this.doc = constructObj(this.schema, this.doc);
       };
 
       #_save = () => {
@@ -61,7 +56,22 @@ export class Model {
           this.modelName
         );
         if (checkModel.err) return console.error(checkModel.err);
-        console.log(checkModel.doc);
+
+        axios({
+          method: "POST",
+          url: "http://localhost:3001/api/insertDoc",
+          data: {
+            doc: checkModel.doc,
+            modelName: this.modelName,
+            schema: this.schema,
+          },
+        })
+          .then((res) => {
+            console.log(res.data);
+          })
+          .catch((err) => {
+            return console.error(err);
+          });
       };
     };
   }

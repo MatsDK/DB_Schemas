@@ -13,9 +13,9 @@ app
   .then(() => {
     const server: Application = express();
 
-    server.use("/api", apiRouter);
     server.use(bodyParser());
     server.use(cors());
+    server.use("/api", apiRouter);
 
     server.get("*", (req: Request, res: Response) => {
       return handle(req, res);
