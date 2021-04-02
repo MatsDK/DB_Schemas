@@ -1,15 +1,12 @@
-import express from "express";
+import express, { Request, Response } from "express";
 import fs from "fs";
-import bson from "bson";
+import BSON from "bson";
 import { nanoid } from "nanoid";
-import _ from "lodash";
+// import _ from "lodash";
+import { checkKeys } from "./utils/checkKeys";
 
 const router = express.Router();
 const DATA_FOLDER = "./data/";
-
-router.get("/", (req, res) => {
-  res.send("api");
-});
 
 interface insertDocBody {
   schema: any;
@@ -21,35 +18,46 @@ interface dataFileDBType {
   dbName: string;
   dbId: string;
   schema: any;
+  rows: any[];
 }
 
-router.post("/insertDoc", (req, res) => {
+router.post("/insertDoc", (req: Request, res: Response) => {
   try {
-    const { modelName, schema }: insertDocBody = req.body;
+    const { modelName, schema, doc }: insertDocBody = req.body;
 
-    const dataFile: any = bson.deserialize(
+    const dataFile: any = BSON.deserialize(
         fs.readFileSync(`${DATA_FOLDER}data`)
       ),
       dbs: dataFileDBType[] = dataFile.dbs;
 
     const dbExists = dbs.find((db: dataFileDBType) => db.dbName === modelName);
-    if (dbExists) {
-      console.log(_.isEqual(dbExists.schema, schema));
-      return res.send("exists");
-    }
+    if (dbExists && !checkKeys(dbExists!.schema, schema))
+      return res.json({
+        err: `DB with name ${modelName} already exists with other schema properties`,
+      });
 
-    const newDBObj: dataFileDBType = {
-      dbName: modelName,
-      dbId: nanoid(),
-      schema,
-    };
-    dbs.unshift(newDBObj);
-    fs.writeFileSync(`${DATA_FOLDER}data`, bson.serialize(dataFile));
+    if (!dbExists) {
+      const newDBObj: dataFileDBType = {
+        dbName: modelName,
+        dbId: nanoid(),
+        schema,
+        rows: [{ ...doc }] || [],
+      };
+
+      dbs.unshift(newDBObj);
+    } else if (typeof doc !== "undefined") dbExists.rows.unshift(doc);
+
+    fs.writeFileSync(`${DATA_FOLDER}data`, BSON.serialize(dataFile));
 
     res.json(dbs);
   } catch (err) {
     return res.send({ err: err.message });
   }
+});
+
+router.get("/getData", (req: Request, res: Response) => {
+  const data = BSON.deserialize(fs.readFileSync(`./data/data`));
+  res.json(data);
 });
 
 export default router;

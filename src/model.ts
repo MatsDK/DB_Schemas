@@ -47,6 +47,13 @@ export class Model {
 
       #createDoc = () => {
         this.doc = constructObj(this.schema, this.doc);
+        const checkModel = checkModelRecursive(
+          this.schema,
+          this.doc,
+          this.modelName
+        );
+
+        if (checkModel.err) throw new Error(checkModel.errData);
       };
 
       #_save = () => {
@@ -55,7 +62,7 @@ export class Model {
           this.doc,
           this.modelName
         );
-        if (checkModel.err) return console.error(checkModel.err);
+        if (checkModel.err) throw new Error(checkModel.errData);
 
         axios({
           method: "POST",
