@@ -10,4 +10,5 @@ export interface ModelReturnProps {
   schema: any;
   Model: any;
   findOne: any;
+  find: any;
 }

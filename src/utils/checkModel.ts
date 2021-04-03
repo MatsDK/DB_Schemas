@@ -1,4 +1,4 @@
-import { SchemaRef } from "../SchemaRef";
+import { isNestedObj, isOptionsObj, isSchemaRef } from "./helpers";
 
 interface checkModelRecursiveRet {
   err: boolean;
@@ -49,7 +49,9 @@ export const constructObj = (schema: any, doc: any) => {
   const schemaKeys: string[] = Object.keys(schema);
 
   schemaKeys.forEach((schemaKey) => {
-    if (isSchemaRef(schema, schema[schemaKey])) {
+    if (isOptionsObj(schema[schemaKey])) {
+      console.log(schemaKey, "isOptions");
+    } else if (isSchemaRef(schema, schema[schemaKey])) {
       const newSchemaObj: any = new Object(doc[schemaKey]);
       Object.keys(schema[schemaKey].schema).forEach((key: string) => {
         if (typeof newSchemaObj[key] === "undefined") newSchemaObj[key] = null;
@@ -71,19 +73,10 @@ export const constructObj = (schema: any, doc: any) => {
   return doc;
 };
 
-const isSchemaRef = (schema: any, thisSchema: any) => {
-  return (
-    thisSchema.constructor.name ===
-    new new SchemaRef(schema).newSchemaRef("", { isArray: false }).constructor
-      .name
-  );
-};
+export const checkModelOptions = (doc: any, schema: any) => {
+  const docKeys: string[] = Object.keys(doc);
 
-const isNestedObj = (schema: any, doc: any, key: string) => {
-  return (
-    typeof schema[key] === "object" &&
-    schema[key] !== null &&
-    typeof doc[key] === "object" &&
-    doc[key] !== null
-  );
+  docKeys.forEach((key: string) => {
+    // console.log(schema[key]);
+  });
 };

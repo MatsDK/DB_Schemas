@@ -1,5 +1,9 @@
-import axios from "axios";
-import { checkModelRecursive, constructObj } from "./utils/checkModel";
+// import axios from "axios";
+import {
+  checkModelOptions,
+  checkModelRecursive,
+  constructObj,
+} from "./utils/checkModel";
 
 export class Model {
   Model: any;
@@ -21,22 +25,21 @@ export class Model {
         this.schema = schema;
         this.#createDoc();
 
-        const returnObj: any = new Object({ ...doc });
-
+        const returnObj: any = new Object(doc);
         Object.defineProperties(returnObj, {
           _save: {
             enumerable: false,
             value: this.#_save,
           },
-          schema: {
+          _schema: {
             enumerable: false,
             value: this.schema,
           },
-          doc: {
+          _doc: {
             enumerable: false,
             value: this.doc,
           },
-          modelName: {
+          _modelName: {
             enumerable: false,
             value: this.modelName,
           },
@@ -54,33 +57,40 @@ export class Model {
         );
 
         if (checkModel.err) throw new Error(checkModel.errData);
+        this.doc = checkModel.doc;
       };
 
-      #_save = () => {
+      #_save = (cb: Function | undefined) => {
+        // console.log(process.env.foo);
+
         const checkModel = checkModelRecursive(
           this.schema,
           this.doc,
           this.modelName
         );
         if (checkModel.err) throw new Error(checkModel.errData);
-
-        axios({
-          method: "POST",
-          url: "http://localhost:3001/api/insertDoc",
-          data: {
-            doc: checkModel.doc,
-            modelName: this.modelName,
-            schema: this.schema,
-          },
-        })
-          .then((res) => {
-            console.log(res.data);
-          })
-          .catch((err) => {
-            return console.error(err);
-          });
+        console.log(checkModelOptions(this.doc, this.schema));
+        // axios({
+        //   method: "POST",
+        //   url: "http://localhost:3001/api/insertDoc",
+        //   data: {
+        //     doc: checkModel.doc,
+        //     modelName: this.modelName,
+        //     schema: this.schema,
+        //   },
+        // })
+        //   .then((res) => {
+        //     // if (cb) cb(res.data[0].rows);
+        //   })
+        //   .catch((err) => {
+        //     throw new Error(err);
+        //   });
       };
     };
+  }
+
+  find(props) {
+    console.log(this.modelName);
   }
 
   findOne() {

@@ -2,7 +2,6 @@ import express, { Request, Response } from "express";
 import fs from "fs";
 import BSON from "bson";
 import { nanoid } from "nanoid";
-// import _ from "lodash";
 import { checkKeys } from "./utils/checkKeys";
 
 const router = express.Router();
@@ -41,11 +40,12 @@ router.post("/insertDoc", (req: Request, res: Response) => {
         dbName: modelName,
         dbId: nanoid(),
         schema,
-        rows: [{ ...doc }] || [],
+        rows: [{ _id: nanoid(), ...doc }] || [],
       };
 
       dbs.unshift(newDBObj);
-    } else if (typeof doc !== "undefined") dbExists.rows.unshift(doc);
+    } else if (typeof doc !== "undefined")
+      dbExists.rows.unshift({ _id: nanoid(), ...doc });
 
     fs.writeFileSync(`${DATA_FOLDER}data`, BSON.serialize(dataFile));
 

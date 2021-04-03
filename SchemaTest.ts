@@ -1,11 +1,11 @@
 import { Schema } from "./src/schema";
 
 const testSchema = new Schema({
-  date: true,
-  test: false,
-  text: true,
-  title: true,
-  email: true,
+  date: { defaultValue: "test" },
+  test: { defaultValue: "test" },
+  text: { defaultValue: "test" },
+  title: { defaultValue: "test" },
+  email: { defaultValue: "test" },
 });
 
 const msgSchema = new Schema({

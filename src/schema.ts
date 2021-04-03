@@ -2,7 +2,13 @@ import { Model } from "./model";
 import { ModelReturnProps } from "./SchemaInterfaces";
 import { SchemaRef } from "./SchemaRef";
 
-const ModelProperties: string[] = ["_save"];
+const ModelProperties: string[] = [
+  "_save",
+  "_id",
+  "_modelName",
+  "_schema",
+  "_doc",
+];
 
 export class Schema {
   obj: any;
@@ -19,7 +25,7 @@ export class Schema {
   #checkSchema = () => {
     Object.keys(this.obj).forEach((x) => {
       if (ModelProperties.includes(x))
-        throw "can't have property _save on Schema";
+        throw new Error(`can't have property ${x} on Schema`);
     });
   };
 

@@ -38,3 +38,5 @@ yarn-error.log*
 createDataFiles.js
 
 /data
+
+notes.txt
