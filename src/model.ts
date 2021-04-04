@@ -61,15 +61,13 @@ export class Model {
       };
 
       #_save = (cb: Function | undefined) => {
-        // console.log(process.env.foo);
-
         const checkModel = checkModelRecursive(
           this.schema,
           this.doc,
           this.modelName
         );
         if (checkModel.err) throw new Error(checkModel.errData);
-        console.log(checkModelOptions(this.doc, this.schema));
+        console.log(checkModelOptions(checkModel.doc, this.schema));
         // axios({
         //   method: "POST",
         //   url: "http://localhost:3001/api/insertDoc",

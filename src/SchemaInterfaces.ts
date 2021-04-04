@@ -1,6 +1,3 @@
-export interface SchemaOptions {
-  extendable: boolean;
-}
 export interface SchemaRefOptionsProps {
   isArray: boolean;
 }
@@ -11,4 +8,10 @@ export interface ModelReturnProps {
   Model: any;
   findOne: any;
   find: any;
+}
+
+export interface checkModelRecursiveRet {
+  err: boolean;
+  doc?: any;
+  errData?: string;
 }

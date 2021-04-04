@@ -1,11 +1,7 @@
+import { checkModelRecursiveRet } from "src/SchemaInterfaces";
 import { isNestedObj, isOptionsObj, isSchemaRef } from "./helpers";
 
-interface checkModelRecursiveRet {
-  err: boolean;
-  doc?: any;
-  errData?: string;
-}
-
+// check if properties on the new object are the same as the properties declared in the schema
 export const checkModelRecursive = (
   schema: any,
   doc: any,
@@ -13,22 +9,42 @@ export const checkModelRecursive = (
 ): checkModelRecursiveRet => {
   const docKeys: string[] = Object.keys(doc);
 
-  for (let i = 0; i < docKeys.length; i++) {
-    if (!(docKeys[i] in schema)) {
+  for (let idx = 0; idx < docKeys.length; idx++) {
+    if (!(docKeys[idx] in schema)) {
       return {
         err: true,
-        errData: `property ${docKeys[i]} does not exist on ${modelName}`,
+        errData: `property ${docKeys[idx]} does not exist on ${modelName}`,
       };
-    } else if (isSchemaRef(schema, schema[docKeys[i]])) {
-      doc[docKeys[i]] = checkModelRecursive(
-        schema[docKeys[i]].schema,
-        doc[docKeys[i]] || {},
-        schema[docKeys[i]].modelName
-      ).doc;
-    } else if (isNestedObj(schema, doc, docKeys[i])) {
+    } else if (isSchemaRef(schema, schema[docKeys[idx]])) {
+      if (
+        typeof doc[docKeys[idx]] !== "undefined" &&
+        schema[docKeys[idx]].isArray !== Array.isArray(doc[docKeys[idx]])
+      )
+        throw new Error("incorrect array type");
+
+      if (schema[docKeys[idx]].isArray) {
+        doc[docKeys[idx]].forEach((x: any) => {
+          x = checkModelRecursive(schema[docKeys[idx]].schema, x || {}, "").doc;
+        });
+      } else {
+        if (typeof doc[docKeys[idx]] !== "object") {
+          throw new Error("incorrect data type declared");
+        }
+
+        const newObj = checkModelRecursive(
+          schema[docKeys[idx]].schema,
+          doc[docKeys[idx]] || {},
+          schema[docKeys[idx]].modelName
+        );
+
+        if (newObj.err) throw new Error(newObj.errData);
+
+        doc[docKeys[idx]] = newObj.doc;
+      }
+    } else if (isNestedObj(schema, doc, docKeys[idx])) {
       const checkCurrObj = checkModelRecursive(
-        schema[docKeys[i]],
-        doc[docKeys[i]],
+        schema[docKeys[idx]],
+        doc[docKeys[idx]],
         modelName
       );
 
@@ -45,34 +61,62 @@ export const checkModelRecursive = (
   return { err: false, doc };
 };
 
+// Create new model and set all properiest that aren't defined to null
 export const constructObj = (schema: any, doc: any) => {
   const schemaKeys: string[] = Object.keys(schema);
 
   schemaKeys.forEach((schemaKey) => {
-    if (isOptionsObj(schema[schemaKey])) {
-      console.log(schemaKey, "isOptions");
+    if (
+      isOptionsObj(schema[schemaKey]) &&
+      !isSchemaRef(schema, schema[schemaKey])
+    ) {
+      if (typeof doc[schemaKey] === "object")
+        doc[schemaKey] = schema[schemaKey].defaultValue || null;
+      doc[schemaKey] =
+        typeof doc[schemaKey] !== "undefined"
+          ? doc[schemaKey]
+          : schema[schemaKey].defaultValue;
+      if (doc[schemaKey] === undefined) doc[schemaKey] = null;
     } else if (isSchemaRef(schema, schema[schemaKey])) {
-      const newSchemaObj: any = new Object(doc[schemaKey]);
-      Object.keys(schema[schemaKey].schema).forEach((key: string) => {
-        if (typeof newSchemaObj[key] === "undefined") newSchemaObj[key] = null;
-      });
+      if (
+        typeof doc[schemaKey] !== "undefined" &&
+        schema[schemaKey].isArray !== Array.isArray(doc[schemaKey])
+      )
+        throw new Error("incorrect array type");
 
-      doc[schemaKey] = newSchemaObj;
+      if (schema[schemaKey].isArray) {
+        if (typeof doc[schemaKey] !== "undefined")
+          doc[schemaKey].forEach((x: any) => {
+            x = constructObj(schema[schemaKey].schema, x || {});
+          });
+        else doc[schemaKey] = [];
+      } else {
+        if (typeof doc[schemaKey] === "undefined") {
+          const newObj = new Object();
+          Object.keys(schema[schemaKey].schema).forEach((key) => {
+            newObj[key] = null;
+          });
+
+          doc[schemaKey] = newObj;
+        }
+      }
     } else if (
       typeof doc[schemaKey] === "undefined" &&
       typeof schema[schemaKey] !== "object"
-    )
+    ) {
       doc[schemaKey] = null;
-    else if (
+    } else if (
       typeof schema[schemaKey] === "object" &&
       schema[schemaKey] !== null
-    )
+    ) {
       doc[schemaKey] = constructObj(schema[schemaKey], doc[schemaKey] || {});
+    }
   });
 
   return doc;
 };
 
+// check if schema propery options are correctly declared with the given options
 export const checkModelOptions = (doc: any, schema: any) => {
   const docKeys: string[] = Object.keys(doc);
 

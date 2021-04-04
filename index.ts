@@ -2,27 +2,17 @@ import { Schema } from "./src/schema";
 import { MessageSchemaRef } from "./SchemaTest";
 
 const userSchema = new Schema({
-  // name: {
-  //   test: { defaultValue: "test" },
-  //   matsdekort: { defaultValue: "test" },
-  //   fdasfsa: {
-  //     fasdfdas: { defaultValue: "test" },
-  //     test2: { defaultValue: "test" },
-  //   },
-  // },
-  isVerified: { defaultValue: "test" },
-  message: new MessageSchemaRef("test", { isArray: false }),
+  verified: { defaultValue: false },
+  name: { defaultValue: "test1" },
+  messages: new MessageSchemaRef("messsageRef", { isArray: true }),
 });
 
 const userModel = userSchema.Model("user0");
 
 const newUser = new userModel.Model({
-  // name: {
-  //   test: "fsadf",
-  //   fdasfsa: { fasdfdas: "fdsa" },
-  // },
-  isVerified: {},
-  message: { text: "value", test: undefined },
+  name: "testName",
+  verified: true,
+  messages: [{ text: "testText", name: "newName", test: [{ date: "test" }] }],
 });
 
 // const test = new MessageModel.Model({ name: "value" });
@@ -30,11 +20,8 @@ const newUser = new userModel.Model({
 
 // userModel.findOne();
 // userModel.find();
+console.log(newUser);
 
-// process.env.foo = "testvar";
-
-// console.log(process.env.foo);
-
-newUser.message.name = "value";
-newUser.message.test = { date: "value" };
-newUser._save((res: any) => console.log(res));
+// newUser.messages.name = "value";
+// newUser.messages.test = { date: "value" };
+// newUser._save((res: any) => console.log(res));

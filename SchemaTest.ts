@@ -1,17 +1,17 @@
 import { Schema } from "./src/schema";
 
 const testSchema = new Schema({
-  date: { defaultValue: "test" },
+  date: { defaultValue: "test1" },
   test: { defaultValue: "test" },
-  text: { defaultValue: "test" },
-  title: { defaultValue: "test" },
+  text2: {},
+  title: { defaultValue: "test1" },
   email: { defaultValue: "test" },
 });
 
 const msgSchema = new Schema({
-  name: true,
-  text: false,
-  test: new testSchema.SchemaRef("test", { isArray: false }),
+  name1: {},
+  text: { defaultValue: "uyoknow" },
+  test: new testSchema.SchemaRef("test", { isArray: true }),
 });
 
 export const MessageModel = msgSchema.Model("message");
