@@ -1,9 +1,6 @@
-// import axios from "axios";
-import {
-  checkModelOptions,
-  checkModelRecursive,
-  constructObj,
-} from "./utils/checkModel";
+import { checkModelRecursive, constructObj } from "./utils/checkModel";
+import * as apiReqs from "./utils/apiRequests";
+import parseFindParams from "./utils/parseParams";
 
 export class Model {
   Model: any;
@@ -61,34 +58,25 @@ export class Model {
       };
 
       #_save = (cb: Function | undefined) => {
-        const checkModel = checkModelRecursive(
-          this.schema,
-          this.doc,
-          this.modelName
-        );
-        if (checkModel.err) throw new Error(checkModel.errData);
-        console.log(checkModelOptions(checkModel.doc, this.schema));
-        // axios({
-        //   method: "POST",
-        //   url: "http://localhost:3001/api/insertDoc",
-        //   data: {
-        //     doc: checkModel.doc,
-        //     modelName: this.modelName,
-        //     schema: this.schema,
-        //   },
-        // })
-        //   .then((res) => {
-        //     // if (cb) cb(res.data[0].rows);
-        //   })
-        //   .catch((err) => {
-        //     throw new Error(err);
-        //   });
+        return apiReqs.saveDoc({
+          schema: this.schema,
+          doc: this.doc,
+          modelName: this.modelName,
+          cb: cb,
+        });
       };
     };
   }
 
-  find(props) {
-    console.log(this.modelName);
+  find(searchQuery: any, options: any, cb: any) {
+    const parsedSearchParams = parseFindParams(searchQuery, options, cb);
+
+    if (parsedSearchParams.options.limit === 0) {
+      if (cb) return parsedSearchParams.cb("Limit can't be 0");
+      throw new Error("Limit can't be 0");
+    }
+
+    return apiReqs.findDocs(this.modelName, parsedSearchParams);
   }
 
   findOne() {

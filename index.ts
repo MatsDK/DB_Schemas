@@ -7,21 +7,29 @@ const userSchema = new Schema({
   messages: new MessageSchemaRef("messsageRef", { isArray: true }),
 });
 
-const userModel = userSchema.Model("user0");
+const userModel = userSchema.Model("user1");
 
-const newUser = new userModel.Model({
-  name: "testName",
-  verified: true,
-  messages: [{ text: "testText", name: "newName", test: [{ date: "test" }] }],
-});
+userModel.find(
+  { name: "test" },
+  { skip: 5, limit: 5 },
+  (res: any, err: any) => {
+    console.log(res, err);
+  }
+);
 
-// const test = new MessageModel.Model({ name: "value" });
-// test._save();
+// const newUser = new userModel.Model({
+//   verified: true,
+//   messages: [{ text: "testText", name1: "newName", test: { date: "test" } }],
+// });
 
-// userModel.findOne();
-// userModel.find();
-console.log(newUser);
+// // const test = new MessageModel.Model({ name: "value" });
+// // test._save();
 
-// newUser.messages.name = "value";
-// newUser.messages.test = { date: "value" };
-// newUser._save((res: any) => console.log(res));
+// // userModel.findOne();
+// // userModel.find();
+
+// newUser.messages[0].name1 = "value";
+
+// newUser._save((res: any, err: any) => {
+//   console.log(res, err);
+// });

@@ -11,7 +11,7 @@ const testSchema = new Schema({
 const msgSchema = new Schema({
   name1: {},
   text: { defaultValue: "uyoknow" },
-  test: new testSchema.SchemaRef("test", { isArray: true }),
+  test: new testSchema.SchemaRef("test", { isArray: false }),
 });
 
 export const MessageModel = msgSchema.Model("message");

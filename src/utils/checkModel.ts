@@ -11,10 +11,9 @@ export const checkModelRecursive = (
 
   for (let idx = 0; idx < docKeys.length; idx++) {
     if (!(docKeys[idx] in schema)) {
-      return {
-        err: true,
-        errData: `property ${docKeys[idx]} does not exist on ${modelName}`,
-      };
+      throw new Error(
+        `property ${docKeys[idx]} does not exist on ${modelName}`
+      );
     } else if (isSchemaRef(schema, schema[docKeys[idx]])) {
       if (
         typeof doc[docKeys[idx]] !== "undefined" &&
@@ -23,9 +22,18 @@ export const checkModelRecursive = (
         throw new Error("incorrect array type");
 
       if (schema[docKeys[idx]].isArray) {
-        doc[docKeys[idx]].forEach((x: any) => {
-          x = checkModelRecursive(schema[docKeys[idx]].schema, x || {}, "").doc;
+        const newArr: any[] = [];
+        doc[docKeys[idx]].forEach((x: any, i: number) => {
+          const newObj = checkModelRecursive(
+            schema[docKeys[idx]].schema,
+            x || {},
+            schema[docKeys[idx]].modelName
+          );
+          if (newObj.err) throw new Error(newObj.errData);
+
+          newArr[i] = newObj.doc;
         });
+        doc[docKeys[idx]] = newArr;
       } else {
         if (typeof doc[docKeys[idx]] !== "object") {
           throw new Error("incorrect data type declared");
@@ -48,16 +56,11 @@ export const checkModelRecursive = (
         modelName
       );
 
-      if (checkCurrObj.err)
-        return {
-          err: true,
-          errData: checkCurrObj.errData,
-        };
+      if (checkCurrObj.err) throw new Error(checkCurrObj.errData);
     }
   }
 
   doc = constructObj(schema, doc);
-
   return { err: false, doc };
 };
 
@@ -70,13 +73,15 @@ export const constructObj = (schema: any, doc: any) => {
       isOptionsObj(schema[schemaKey]) &&
       !isSchemaRef(schema, schema[schemaKey])
     ) {
-      if (typeof doc[schemaKey] === "object")
-        doc[schemaKey] = schema[schemaKey].defaultValue || null;
+      if (typeof doc[schemaKey] === "object") {
+        doc[schemaKey] = schema[schemaKey].defaultValue ?? null;
+      }
       doc[schemaKey] =
         typeof doc[schemaKey] !== "undefined"
           ? doc[schemaKey]
           : schema[schemaKey].defaultValue;
-      if (doc[schemaKey] === undefined) doc[schemaKey] = null;
+      if (doc[schemaKey] === undefined)
+        doc[schemaKey] = schema[schemaKey].defaultValue || null;
     } else if (isSchemaRef(schema, schema[schemaKey])) {
       if (
         typeof doc[schemaKey] !== "undefined" &&
@@ -119,6 +124,8 @@ export const constructObj = (schema: any, doc: any) => {
 // check if schema propery options are correctly declared with the given options
 export const checkModelOptions = (doc: any, schema: any) => {
   const docKeys: string[] = Object.keys(doc);
+
+  console.log(doc);
 
   docKeys.forEach((key: string) => {
     // console.log(schema[key]);

@@ -49,15 +49,35 @@ router.post("/insertDoc", (req: Request, res: Response) => {
 
     fs.writeFileSync(`${DATA_FOLDER}data`, BSON.serialize(dataFile));
 
-    res.json(dbs);
+    res.json({ err: false });
   } catch (err) {
     return res.send({ err: err.message });
   }
 });
 
-router.get("/getData", (req: Request, res: Response) => {
-  const data = BSON.deserialize(fs.readFileSync(`./data/data`));
-  res.json(data);
+interface findDataReqBody {
+  modelName: string;
+  searchQuery: any;
+  options: { skip: number; limit: number | undefined };
+}
+
+router.post("/findData", (req: any, res: Response) => {
+  const {
+    modelName,
+    searchQuery,
+    options: { skip, limit },
+  }: findDataReqBody = req.body;
+  if (typeof modelName !== "string")
+    return res.json({ err: "invalid DB name" });
+  console.log(modelName, searchQuery, skip, limit);
+
+  const dataFile: any = BSON.deserialize(fs.readFileSync(`${DATA_FOLDER}data`)),
+    dbs: dataFileDBType[] = dataFile.dbs;
+
+  const thisDB = dbs.find((db: dataFileDBType) => db.dbName === modelName);
+  if (!thisDB) return { err: `Database ${modelName} not found` };
+
+  return res.json({ err: false, rows: thisDB.rows });
 });
 
 export default router;

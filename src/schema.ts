@@ -30,7 +30,7 @@ export class Schema {
   };
 
   Model(ModelName: string): ModelReturnProps {
-    if (typeof ModelName !== "string") throw "enter valid name";
+    if (typeof ModelName !== "string" && !ModelName) throw "enter valid name";
     return new Model(this.obj, ModelName);
   }
 }
