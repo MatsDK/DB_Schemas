@@ -1,5 +1,5 @@
 import { checkModelRecursive, constructObj } from "./utils/checkModel";
-import * as apiReqs from "./utils/apiRequests";
+import * as apiReqs from "./utils/serverRequests";
 import parseFindParams from "./utils/parseParams";
 
 export class Model {
@@ -71,7 +71,7 @@ export class Model {
   find(searchQuery: any, options: any, cb: any) {
     const parsedSearchParams = parseFindParams(searchQuery, options, cb);
 
-    if (parsedSearchParams.options.limit === 0) {
+    if (parsedSearchParams.options?.limit === 0) {
       if (cb) return parsedSearchParams.cb("Limit can't be 0");
       throw new Error("Limit can't be 0");
     }

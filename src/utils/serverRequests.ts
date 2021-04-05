@@ -1,5 +1,5 @@
 import axios from "axios";
-import { checkModelRecursive } from "./checkModel";
+import { checkModelOptions, checkModelRecursive } from "./checkModel";
 
 interface saveDocProps {
   schema: any;
@@ -12,6 +12,10 @@ const saveDoc = (props: saveDocProps) => {
   const { schema, doc, modelName, cb }: saveDocProps = props;
   const checkModel = checkModelRecursive(schema, doc, modelName);
   if (checkModel.err) throw new Error(checkModel.errData);
+
+  const checkOptions = checkModelOptions(checkModel.doc, schema);
+  if (checkOptions.err && typeof checkOptions.err === "string")
+    throw new Error(checkOptions.err);
 
   axios({
     method: "POST",
@@ -32,6 +36,7 @@ const saveDoc = (props: saveDocProps) => {
     .catch((err) => {
       throw new Error(err);
     });
+  if (cb) cb(null, null);
 };
 
 const findDocs = (modelName: string, { cb, ...rest }) => {

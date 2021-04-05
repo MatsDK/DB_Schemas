@@ -33,3 +33,9 @@ export const isOptionsObj = (obj: any): boolean => {
     Object.keys(obj).every((key: string): boolean => typeOptions.includes(key))
   );
 };
+
+const findOptionsKeys = ["limit", "skip"];
+
+export const isFindOptions = (obj: any): boolean => {
+  return Object.keys(obj).every((key: string) => findOptionsKeys.includes(key));
+};

@@ -1,16 +1,16 @@
+import { isFindOptions } from "./helpers";
+
 export default (searchQuery: any, options: any, cb: any) => {
+  let newOptions = { limit: undefined, skip: 0 };
+
   if (typeof cb === "function") cb = cb;
   if (typeof searchQuery === "object") searchQuery = searchQuery;
 
-  if (
-    typeof options === "function" &&
-    typeof cb === "undefined" &&
-    isFindOptions(searchQuery)
-  ) {
+  if (typeof options === "function" && typeof cb === "undefined") {
     cb = options;
 
     if (isFindOptions(searchQuery)) {
-      options = searchQuery;
+      newOptions = searchQuery;
       searchQuery = {};
     }
   } else if (
@@ -20,16 +20,13 @@ export default (searchQuery: any, options: any, cb: any) => {
   ) {
     cb = searchQuery;
     searchQuery = {};
-    options = { limit: undefined, skip: 0 };
+    newOptions = { limit: undefined, skip: 0 };
   }
 
-  if (typeof options?.skip === "number") options.skip = options.skip;
-  if (typeof options?.limit === "number") options.limit = options.skip;
+  if (typeof options?.skip === "number") newOptions.skip = options.skip;
+  if (typeof options?.limit === "number") newOptions.limit = options.limit;
+  if (typeof searchQuery === "undefined") searchQuery = {};
 
+  options = newOptions;
   return { searchQuery, options, cb };
-};
-
-const findOptionsKeys = ["limit", "skip"];
-const isFindOptions = (obj: any): boolean => {
-  return Object.keys(obj).every((key: string) => findOptionsKeys.includes(key));
 };

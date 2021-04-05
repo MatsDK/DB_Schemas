@@ -69,15 +69,20 @@ router.post("/findData", (req: any, res: Response) => {
   }: findDataReqBody = req.body;
   if (typeof modelName !== "string")
     return res.json({ err: "invalid DB name" });
-  console.log(modelName, searchQuery, skip, limit);
-
+  console.log(searchQuery);
   const dataFile: any = BSON.deserialize(fs.readFileSync(`${DATA_FOLDER}data`)),
     dbs: dataFileDBType[] = dataFile.dbs;
 
-  const thisDB = dbs.find((db: dataFileDBType) => db.dbName === modelName);
-  if (!thisDB) return { err: `Database ${modelName} not found` };
+  const thisDB: dataFileDBType | undefined = dbs.find(
+    (db: dataFileDBType) => db.dbName === modelName
+  );
+  if (!thisDB) return res.json({ err: `Database ${modelName} not found` });
 
-  return res.json({ err: false, rows: thisDB.rows });
+  const thisData: any[] = thisDB.rows;
+  thisData.splice(0, skip);
+  if (limit) thisData.length = limit;
+
+  return res.json({ err: false, rows: thisData.filter((x: any) => x != null) });
 });
 
 export default router;

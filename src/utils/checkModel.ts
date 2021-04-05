@@ -35,9 +35,8 @@ export const checkModelRecursive = (
         });
         doc[docKeys[idx]] = newArr;
       } else {
-        if (typeof doc[docKeys[idx]] !== "object") {
+        if (typeof doc[docKeys[idx]] !== "object")
           throw new Error("incorrect data type declared");
-        }
 
         const newObj = checkModelRecursive(
           schema[docKeys[idx]].schema,
@@ -95,15 +94,13 @@ export const constructObj = (schema: any, doc: any) => {
             x = constructObj(schema[schemaKey].schema, x || {});
           });
         else doc[schemaKey] = [];
-      } else {
-        if (typeof doc[schemaKey] === "undefined") {
-          const newObj = new Object();
-          Object.keys(schema[schemaKey].schema).forEach((key) => {
-            newObj[key] = null;
-          });
+      } else if (typeof doc[schemaKey] === "undefined") {
+        const newObj = new Object();
+        Object.keys(schema[schemaKey].schema).forEach((key) => {
+          newObj[key] = null;
+        });
 
-          doc[schemaKey] = newObj;
-        }
+        doc[schemaKey] = newObj;
       }
     } else if (
       typeof doc[schemaKey] === "undefined" &&
@@ -122,12 +119,42 @@ export const constructObj = (schema: any, doc: any) => {
 };
 
 // check if schema propery options are correctly declared with the given options
-export const checkModelOptions = (doc: any, schema: any) => {
+export const checkModelOptions = (
+  doc: any,
+  schema: any
+): { err?: boolean | string } => {
   const docKeys: string[] = Object.keys(doc);
 
-  console.log(doc);
+  for (let i = 0; i < docKeys.length; i++) {
+    const key = docKeys[i];
+    if (isOptionsObj(schema[key])) {
+      if (schema[key].required && (doc[key] == null || doc[key] === "")) {
+        return { err: `property ${key} is required` };
+      }
+    } else if (isSchemaRef(schema, schema[key] || {})) {
+      if (schema[key].isArray) {
+        const checkArray = checkArrayOptions(doc[key], schema[key]);
+        if (checkArray.err) return { err: checkArray.err };
+      } else {
+        const checkModel = checkModelOptions(doc[key], schema[key].schema);
+        if (checkModel.err) return { err: checkModel.err };
+      }
+    } else if (isNestedObj(schema, doc, key)) {
+      const checkModel = checkModelOptions(doc[key], schema[key]);
+      if (checkModel.err) return { err: checkModel.err };
+    }
+  }
+  return { err: false };
+};
 
-  docKeys.forEach((key: string) => {
-    // console.log(schema[key]);
-  });
+const checkArrayOptions = (
+  docs: any[],
+  schema: any
+): { err?: boolean | string } => {
+  for (let i = 0; i < docs.length; i++) {
+    const doc: any = docs[i];
+    const checkModel = checkModelOptions(doc, schema.schema);
+    if (checkModel.err) return { err: checkModel.err };
+  }
+  return { err: false };
 };

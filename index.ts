@@ -2,31 +2,29 @@ import { Schema } from "./src/schema";
 import { MessageSchemaRef } from "./SchemaTest";
 
 const userSchema = new Schema({
-  verified: { defaultValue: false },
+  verified: {
+    isVerified: { defaultValue: false, required: true },
+  },
   name: { defaultValue: "test1" },
   messages: new MessageSchemaRef("messsageRef", { isArray: true }),
 });
 
 const userModel = userSchema.Model("user1");
 
-userModel.find(
-  { name: "test" },
-  { skip: 5, limit: 5 },
-  (res: any, err: any) => {
-    console.log(res, err);
-  }
-);
+userModel.find({ skip: 3, limit: 10 }, (res: any, err: any) => {
+  console.log(res, res.length, err);
+});
 
 // const newUser = new userModel.Model({
-//   verified: true,
-//   messages: [{ text: "testText", name1: "newName", test: { date: "test" } }],
+//   verified: { isVerified: undefined },
+//   messages: [{ name: "newName", details: { email: "test" } }],
 // });
 
-// // const test = new MessageModel.Model({ name: "value" });
-// // test._save();
+// const test = new MessageModel.Model({ name: "value" });
+// test._save();
 
-// // userModel.findOne();
-// // userModel.find();
+// userModel.findOne();
+// userModel.find();
 
 // newUser.messages[0].name1 = "value";
 
