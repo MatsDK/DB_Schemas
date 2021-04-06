@@ -1,6 +1,6 @@
 import { checkModelRecursive, constructObj } from "./utils/checkModel";
 import * as apiReqs from "./utils/serverRequests";
-import parseFindParams from "./utils/parseParams";
+import { parseFindParams, parseUpdateParams } from "./utils/parseParams";
 
 export class Model {
   Model: any;
@@ -46,6 +46,8 @@ export class Model {
       }
 
       #createDoc = () => {
+        delete this.doc._id;
+
         this.doc = constructObj(this.schema, this.doc);
         const checkModel = checkModelRecursive(
           this.schema,
@@ -68,18 +70,32 @@ export class Model {
     };
   }
 
-  find(searchQuery: any, options: any, cb: any) {
+  public find(searchQuery: any, options: any, cb: any) {
     const parsedSearchParams = parseFindParams(searchQuery, options, cb);
 
     if (parsedSearchParams.options?.limit === 0) {
-      if (cb) return parsedSearchParams.cb("Limit can't be 0");
+      if (cb) return parsedSearchParams.cb(null, "Limit can't be 0");
       throw new Error("Limit can't be 0");
     }
 
     return apiReqs.findDocs(this.modelName, parsedSearchParams);
   }
 
-  findOne() {
-    console.log(this.modelName);
+  public findOne(searchQuery: any, options: any, cb: any) {
+    const parsedSearchParams = parseFindParams(searchQuery, options, cb);
+    parsedSearchParams.options.limit = 1;
+
+    return apiReqs.findDocs(this.modelName, parsedSearchParams);
+  }
+
+  public update(searchQuery: any, updateQuery: any, options: any, cb: any) {
+    const updateParams = parseUpdateParams(
+      searchQuery,
+      updateQuery,
+      options,
+      cb
+    );
+
+    return apiReqs.updateDocs(this.modelName, updateParams);
   }
 }

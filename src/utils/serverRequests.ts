@@ -60,4 +60,21 @@ const findDocs = (modelName: string, { cb, ...rest }) => {
     });
 };
 
-export { saveDoc, findDocs };
+const updateDocs = (modelName: string, { cb, ...rest }) => {
+  axios({
+    method: "POST",
+    url: "http://localhost:3001/api/updateData",
+    data: {
+      modelName,
+      ...rest,
+    },
+  })
+    .then((res) => {
+      cb(res.data.updatedDocs, res.data.err || null);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
+export { saveDoc, findDocs, updateDocs };

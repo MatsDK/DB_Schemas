@@ -4,6 +4,7 @@ import { SchemaRef } from "./SchemaRef";
 
 const ModelProperties: string[] = [
   "_save",
+  "_update",
   "_id",
   "_modelName",
   "_schema",

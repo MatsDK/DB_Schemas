@@ -9,15 +9,29 @@ const userSchema = new Schema({
   messages: new MessageSchemaRef("messsageRef", { isArray: true }),
 });
 
-const userModel = userSchema.Model("user1");
+const userModel = userSchema.Model("user21");
 
-userModel.find({ skip: 3, limit: 10 }, (res: any, err: any) => {
-  console.log(res, res.length, err);
-});
+userModel.update(
+  { verified: { isVerified: true } },
+  { name: "test2121212121", verified: { isVerified: false } },
+  (res: any, err: any) => {
+    console.log(res, err);
+  }
+);
+
+// userModel.findOne(
+//   { verified: { isVerified: false } },
+//   (rows: any[], err: any) => {
+//     console.log(rows, rows.length);
+//   }
+// );
 
 // const newUser = new userModel.Model({
-//   verified: { isVerified: undefined },
-//   messages: [{ name: "newName", details: { email: "test" } }],
+//   name: "test12",
+//   verified: { isVerified: true },
+//   messages: [
+//     { name: "newName", details: { email: "test", password: "anypassword" } },
+//   ],
 // });
 
 // const test = new MessageModel.Model({ name: "value" });
