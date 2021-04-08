@@ -1,5 +1,6 @@
 import axios from "axios";
-import { checkModelOptions, checkModelRecursive } from "./checkModel";
+import constructDocs from "./constructDocs";
+import { checkModelOptions, checkModelRecursive } from "./model/checkModel";
 
 interface saveDocProps {
   schema: any;
@@ -17,25 +18,25 @@ const saveDoc = (props: saveDocProps) => {
   if (checkOptions.err && typeof checkOptions.err === "string")
     throw new Error(checkOptions.err);
 
-  axios({
-    method: "POST",
-    url: "http://localhost:3001/api/insertDoc",
-    data: {
-      doc: checkModel.doc,
-      modelName: modelName,
-      schema: schema,
-    },
-  })
-    .then((res) => {
-      if (cb) {
-        if (res.data.err) return cb(null, res.data.err);
-        else return cb("saved", null);
-      }
-      return res.data.rows;
-    })
-    .catch((err) => {
-      throw new Error(err);
-    });
+  // axios({
+  //   method: "POST",
+  //   url: "http://localhost:3001/api/insertDoc",
+  //   data: {
+  //     doc: checkModel.doc,
+  //     modelName: modelName,
+  //     schema: schema,
+  //   },
+  // })
+  //   .then((res) => {
+  //     if (cb) {
+  //       if (res.data.err) return cb(null, res.data.err);
+  //       else return cb("saved", null);
+  //     }
+  //     return res.data.rows;
+  //   })
+  //   .catch((err) => {
+  //     throw new Error(err);
+  //   });
   if (cb) cb(null, null);
 };
 
@@ -52,8 +53,11 @@ const findDocs = (modelName: string, { cb, ...rest }) => {
         if (cb) return cb(null, res.data.err);
         throw new Error(res.data.err);
       }
-      if (cb) return cb(res.data.rows, null);
-      return res.data.rows;
+
+      const rows = constructDocs(res.data.rows);
+
+      if (cb) return cb(rows, null);
+      return rows;
     })
     .catch((err) => {
       throw new Error(err);

@@ -1,6 +1,7 @@
 import { Model } from "./model";
 import { ModelReturnProps } from "./SchemaInterfaces";
 import { SchemaRef } from "./SchemaRef";
+import { checkSchemaOptions } from "./utils/checkSchema";
 
 const ModelProperties: string[] = [
   "_save",
@@ -28,6 +29,9 @@ export class Schema {
       if (ModelProperties.includes(x))
         throw new Error(`can't have property ${x} on Schema`);
     });
+
+    const checkOptions: any = checkSchemaOptions(this.obj);
+    if (checkOptions.err) throw new Error(checkOptions.err);
   };
 
   Model(ModelName: string): ModelReturnProps {

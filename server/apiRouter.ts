@@ -103,22 +103,32 @@ router.post("/updateData", (req: Request, res: Response) => {
   ]);
 
   let updated: number = 0,
-    changedArr: any[] = [];
-
-  thisData.splice(0, skip);
+    changedArr: any[] = [],
+    skipped: number = 0;
 
   for (let i = 0; i < thisData.length; i++) {
     const row: any = thisData[i];
+    let changed: boolean = false;
 
     if (typeof limit != "undefined" && updated >= limit) break;
-    let changed: boolean = false;
 
     for (let j = 0; j < updateKeys.length; j++) {
       const key: string[] = updateKeys[j];
       if (!(key[0] in row)) continue;
+      if (typeof row[key[0]] != "undefined") changed = true;
+    }
 
-      if (typeof row[key[0]] != "undefined") {
-        if (typeof row[key[0]] === "object" && row[key[0]] != null) {
+    if (!changed) continue;
+    if (skipped >= skip) {
+      updated++;
+
+      for (let j = 0; j < updateKeys.length; j++) {
+        const key: string[] = updateKeys[j];
+        if (
+          typeof row[key[0]] === "object" &&
+          row[key[0]] != null &&
+          skip <= skipped
+        ) {
           const updateRec: {
             err?: string | boolean;
             doc?: any;
@@ -126,15 +136,13 @@ router.post("/updateData", (req: Request, res: Response) => {
           if (updateRec.err) return res.json({ err: updateRec.err });
 
           row[key[0]] = updateRec.doc;
-        } else row[key[0]] = key[1];
-
-        changed = true;
+        } else if (skip <= skipped) row[key[0]] = key[1];
       }
-    }
-    if (changed) {
       changedArr.push(row);
-      updated++;
     }
+
+    skipped++;
+    if (typeof limit !== "undefined" && updated >= limit) break;
   }
 
   res.json({ err: false, updatedDocs: changedArr });
@@ -149,6 +157,11 @@ const updateRecursive = (
 
   if (Array.isArray(obj)) return { err: "can't update array" };
   else {
+    if (typeof updateQuery[1] !== "object" && updateQuery[1] != null) {
+      if (!(updateQuery[0] in obj))
+        return { err: `propery ${updateQuery[0]} does not exitst on object` };
+      obj[updateQuery[0]] = updateQuery[1];
+    }
     const updateKeys = Object.keys(updateQuery[1]);
 
     for (let i = 0; i < updateKeys.length; i++) {
@@ -159,12 +172,16 @@ const updateRecursive = (
       ) {
         const recursiveKeys: string[][] = Object.keys(
           updateQuery[1][updateKey]
-        ).map((x: string) => [x, updateQuery[1][x]]);
+        ).map((x: string) => {
+          return [x, updateQuery[1][updateKey][x]];
+        });
 
-        const recursive = updateRecursive(obj[updateKey], recursiveKeys);
-        if (recursive.err) return { err: recursive.err };
+        recursiveKeys.forEach((recursiveKey) => {
+          const recursive = updateRecursive(obj[updateKey], recursiveKey);
+          if (recursive.err) return { err: recursive.err };
 
-        if (updateKey in obj) obj[updateKey] = recursive.doc;
+          if (updateKey in obj) obj[updateKey] = recursive.doc;
+        });
       } else if (updateKey in obj) obj[updateKey] = updateQuery[1][updateKey];
     }
   }

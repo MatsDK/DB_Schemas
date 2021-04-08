@@ -8,7 +8,8 @@ export interface ModelReturnProps {
   Model: any;
   findOne: any;
   find: any;
-  update: any;
+  findAndUpdate: any;
+  findOneAndUpdate: any;
 }
 
 export interface checkModelRecursiveRet {

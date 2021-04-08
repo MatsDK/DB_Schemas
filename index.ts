@@ -2,22 +2,39 @@ import { Schema } from "./src/schema";
 import { MessageSchemaRef } from "./SchemaTest";
 
 const userSchema = new Schema({
-  verified: {
-    isVerified: { defaultValue: false, required: true },
-  },
-  name: { defaultValue: "test1" },
-  messages: new MessageSchemaRef("messsageRef", { isArray: true }),
+  name: { defaultValue: "jfdksal", type: "string" },
+  messages: [
+    {
+      text: {
+        name: { defaultValue: "empty", type: "string" },
+        age: { type: "number", required: true },
+      },
+    },
+  ],
+  messages1: new MessageSchemaRef("messsageRef", { isArray: true }),
 });
 
-const userModel = userSchema.Model("user21");
+const userModel = userSchema.Model("user2");
 
-userModel.update(
-  { verified: { isVerified: true } },
-  { name: "test2121212121", verified: { isVerified: false } },
-  (res: any, err: any) => {
-    console.log(res, err);
-  }
-);
+// userModel.findAndUpdate(
+//   { age: 21 },
+//   {
+//     age: 22,
+//     name: "test21212121212121",
+//   },
+//   (updatedData: any[], err: any) => {
+//     console.log(updatedData[0], err);
+//   }
+// );
+
+// userModel.find((rows, err) => {
+//   if (err) throw err;
+
+//   console.log(rows);
+//   // rows.forEach((row: any) => {
+//   //   row._save();
+//   // });
+// });
 
 // userModel.findOne(
 //   { verified: { isVerified: false } },
@@ -26,22 +43,14 @@ userModel.update(
 //   }
 // );
 
-// const newUser = new userModel.Model({
-//   name: "test12",
-//   verified: { isVerified: true },
-//   messages: [
-//     { name: "newName", details: { email: "test", password: "anypassword" } },
-//   ],
-// });
+const newUser = new userModel.Model({
+  name: "",
+  messages: [{ text: { name: "testName", age: 21 } }],
+  messages1: [{ name: true }],
+});
 
-// const test = new MessageModel.Model({ name: "value" });
-// test._save();
+console.log(newUser);
 
-// userModel.findOne();
-// userModel.find();
-
-// newUser.messages[0].name1 = "value";
-
-// newUser._save((res: any, err: any) => {
-//   console.log(res, err);
-// });
+newUser._save((res: any, err: any) => {
+  console.log(res, err);
+});

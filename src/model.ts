@@ -1,6 +1,10 @@
-import { checkModelRecursive, constructObj } from "./utils/checkModel";
-import * as apiReqs from "./utils/serverRequests";
+import {
+  checkModelRecursive,
+  checkUpdateProps,
+} from "./utils/model/checkModel";
+// import { constructObj } from "./utils/model/constructModel";
 import { parseFindParams, parseUpdateParams } from "./utils/parseParams";
+import * as apiReqs from "./utils/serverRequests";
 
 export class Model {
   Model: any;
@@ -48,7 +52,8 @@ export class Model {
       #createDoc = () => {
         delete this.doc._id;
 
-        this.doc = constructObj(this.schema, this.doc);
+        // this.doc = constructObj(this.schema, this.doc);
+
         const checkModel = checkModelRecursive(
           this.schema,
           this.doc,
@@ -70,7 +75,7 @@ export class Model {
     };
   }
 
-  public find(searchQuery: any, options: any, cb: any) {
+  find(searchQuery: any, options: any, cb: any) {
     const parsedSearchParams = parseFindParams(searchQuery, options, cb);
 
     if (parsedSearchParams.options?.limit === 0) {
@@ -81,15 +86,15 @@ export class Model {
     return apiReqs.findDocs(this.modelName, parsedSearchParams);
   }
 
-  public findOne(searchQuery: any, options: any, cb: any) {
+  findOne(searchQuery: any, options: any, cb: any) {
     const parsedSearchParams = parseFindParams(searchQuery, options, cb);
     parsedSearchParams.options.limit = 1;
 
     return apiReqs.findDocs(this.modelName, parsedSearchParams);
   }
 
-  public update(searchQuery: any, updateQuery: any, options: any, cb: any) {
-    const updateParams = parseUpdateParams(
+  findAndUpdate(searchQuery: any, updateQuery: any, options: any, cb: any) {
+    const updateParams = this.#getAndParseUpdateParams(
       searchQuery,
       updateQuery,
       options,
@@ -98,4 +103,43 @@ export class Model {
 
     return apiReqs.updateDocs(this.modelName, updateParams);
   }
+
+  findOneAndUpdate(searchQuery: any, updateQuery: any, options: any, cb: any) {
+    const updateParams = this.#getAndParseUpdateParams(
+      searchQuery,
+      updateQuery,
+      options,
+      cb
+    );
+
+    updateParams.options.limit = 1;
+    return apiReqs.updateDocs(this.modelName, updateParams);
+  }
+
+  #getAndParseUpdateParams = (
+    searchQuery: any,
+    updateQuery: any,
+    options: any,
+    cb: any
+  ) => {
+    const updateParams = parseUpdateParams(
+      searchQuery,
+      updateQuery,
+      options,
+      cb
+    );
+
+    const checkUpdate: { err: string } = checkUpdateProps(
+      this.schema,
+      updateParams.updateQuery,
+      this.modelName
+    );
+
+    if (checkUpdate.err) {
+      if (updateQuery.cb) return updateQuery.cb(checkUpdate.err);
+      throw new Error(checkUpdate.err);
+    }
+
+    return updateParams;
+  };
 }

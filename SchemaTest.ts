@@ -1,13 +1,7 @@
 import { Schema } from "./src/schema";
 
-const testSchema = new Schema({
-  password: { required: true },
-  email: { defaultValue: "test" },
-});
-
 const msgSchema = new Schema({
-  name: { defaultValue: "" },
-  details: new testSchema.SchemaRef("test", { isArray: false }),
+  name: { defaultValue: false, type: "boolean" },
 });
 
 export const MessageModel = msgSchema.Model("message");
