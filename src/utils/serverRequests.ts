@@ -18,29 +18,28 @@ const saveDoc = (props: saveDocProps) => {
   if (checkOptions.err && typeof checkOptions.err === "string")
     throw new Error(checkOptions.err);
 
-  // axios({
-  //   method: "POST",
-  //   url: "http://localhost:3001/api/insertDoc",
-  //   data: {
-  //     doc: checkModel.doc,
-  //     modelName: modelName,
-  //     schema: schema,
-  //   },
-  // })
-  //   .then((res) => {
-  //     if (cb) {
-  //       if (res.data.err) return cb(null, res.data.err);
-  //       else return cb("saved", null);
-  //     }
-  //     return res.data.rows;
-  //   })
-  //   .catch((err) => {
-  //     throw new Error(err);
-  //   });
-  if (cb) cb(null, null);
+  axios({
+    method: "POST",
+    url: "http://localhost:3001/api/insertDoc",
+    data: {
+      doc: checkModel.doc,
+      modelName: modelName,
+      schema: schema,
+    },
+  })
+    .then((res) => {
+      if (cb) {
+        if (res.data.err) return cb(null, res.data.err);
+        else return cb("saved", null);
+      }
+      return res.data.rows;
+    })
+    .catch((err) => {
+      throw new Error(err);
+    });
 };
 
-const findDocs = (modelName: string, { cb, ...rest }) => {
+const findDocs = (modelName: string, { cb, ...rest }, schema: any) => {
   if (!modelName) throw new Error("Invalid DB name");
 
   axios({
@@ -54,7 +53,7 @@ const findDocs = (modelName: string, { cb, ...rest }) => {
         throw new Error(res.data.err);
       }
 
-      const rows = constructDocs(res.data.rows);
+      const rows = constructDocs(res.data.rows, schema, modelName);
 
       if (cb) return cb(rows, null);
       return rows;
@@ -77,7 +76,7 @@ const updateDocs = (modelName: string, { cb, ...rest }) => {
       cb(res.data.updatedDocs, res.data.err || null);
     })
     .catch((err) => {
-      console.log(err);
+      throw new Error(err);
     });
 };
 

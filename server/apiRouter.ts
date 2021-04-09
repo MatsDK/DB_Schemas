@@ -202,4 +202,23 @@ const getThisDB = (modelName: string) => {
   return thisDB;
 };
 
+router.post("/updateStrict", (req: Request, res: Response) => {
+  const { modelName, searchQuery, updateQuery }: updateDataBody = req.body;
+
+  let thisDB: any = getThisDB(modelName);
+  if (thisDB.err) return res.json(thisDB);
+
+  const idx: number | undefined = thisDB.rows.findIndex(
+    (row: any) => row._id === searchQuery._id
+  );
+  if (typeof idx == "undefined") return res.json({ err: "can't find row" });
+
+  thisDB.rows[idx] = {
+    _id: searchQuery._id,
+    ...updateQuery,
+  };
+
+  res.json({ err: false });
+});
+
 export default router;

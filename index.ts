@@ -2,7 +2,7 @@ import { Schema } from "./src/schema";
 import { MessageSchemaRef } from "./SchemaTest";
 
 const userSchema = new Schema({
-  name: { defaultValue: "jfdksal", type: "string" },
+  name: { type: "string" },
   messages: [
     {
       text: {
@@ -14,27 +14,29 @@ const userSchema = new Schema({
   messages1: new MessageSchemaRef("messsageRef", { isArray: true }),
 });
 
-const userModel = userSchema.Model("user2");
+const userModel = userSchema.Model("newUserModel");
 
 // userModel.findAndUpdate(
-//   { age: 21 },
-//   {
-//     age: 22,
-//     name: "test21212121212121",
-//   },
+//   { _id: "YBrHsPhlMERrRQTZcMK5d" },
+//   { name: "test21212121212121" },
 //   (updatedData: any[], err: any) => {
-//     console.log(updatedData[0], err);
+//     console.log(updatedData, err);
 //   }
 // );
 
-// userModel.find((rows, err) => {
-//   if (err) throw err;
+userModel.find((rows: any[], err: any) => {
+  if (err) throw err;
 
-//   console.log(rows);
-//   // rows.forEach((row: any) => {
-//   //   row._save();
-//   // });
-// });
+  rows[0].name = "newName";
+  console.log(
+    rows[0]._save((res: any, err: any) => {
+      console.log(res, err);
+    })
+  );
+  // rows.forEach((row: any) => {
+  //   row._save();
+  // });
+});
 
 // userModel.findOne(
 //   { verified: { isVerified: false } },
@@ -43,14 +45,14 @@ const userModel = userSchema.Model("user2");
 //   }
 // );
 
-const newUser = new userModel.Model({
-  name: "",
-  messages: [{ text: { name: "testName", age: 21 } }],
-  messages1: [{ name: true }],
-});
+// const newUser = new userModel.Model({
+//   name: "newUserName",
+//   messages: [{ text: { name: "testName", age: 21 } }],
+//   messages1: [{ name: true }],
+// });
 
-console.log(newUser);
+// console.log(newUser);
 
-newUser._save((res: any, err: any) => {
-  console.log(res, err);
-});
+// newUser._save((res: any, err: any) => {
+//   console.log(res, err);
+// });

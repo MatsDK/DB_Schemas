@@ -9,84 +9,95 @@ export const checkModelRecursive = (
   modelName: string
 ): checkModelRecursiveRet => {
   try {
+    delete doc._id;
     const docKeys: string[] = Object.keys(doc);
 
     for (let idx = 0; idx < docKeys.length; idx++) {
       const key: string = docKeys[idx];
 
-      if (!(key in schema)) {
+      if (!(key in schema))
         throw new Error(`property ${key} does not exist on ${modelName}`);
-      } else if (isSchemaRef(schema, schema[key])) {
-        if (
-          typeof doc[key] !== "undefined" &&
-          schema[key].isArray !== Array.isArray(doc[key])
-        )
-          throw new Error("incorrect array type");
-
-        if (schema[key].isArray) {
-          const newArr: any[] = [];
-          doc[key].forEach((x: any, i: number) => {
-            const newObj = checkModelRecursive(
-              schema[key].schema,
-              x || {},
-              schema[key].modelName
-            );
-            if (newObj.err) throw new Error(newObj.errData);
-
-            newArr[i] = newObj.doc;
-          });
-          doc[key] = newArr;
-        } else {
-          if (typeof doc[key] !== "object")
-            throw new Error("incorrect data type declared");
-
-          const newObj = checkModelRecursive(
-            schema[key].schema,
-            doc[key] || {},
-            schema[key].modelName
-          );
-
-          if (newObj.err) throw new Error(newObj.errData);
-
-          doc[key] = newObj.doc;
-        }
-      } else if (Array.isArray(schema[key])) {
-        if (!Array.isArray(doc[key]))
-          throw new Error(
-            `cannot convery propery ${key} of type array to object`
-          );
-
-        doc[key].forEach((x: any) => {
-          const checkRecursive = checkModelRecursive(
-            schema[key][0],
-            x,
-            modelName
-          );
-          if (checkRecursive.err) throw new Error(checkRecursive.errData);
-
-          x = checkRecursive.doc;
-        });
-      } else if (isNestedObj(schema, doc, key)) {
-        if (Array.isArray(doc[key]))
-          throw new Error(
-            `cannot convery propery ${key} of type object to array`
-          );
-
-        const checkCurrObj = checkModelRecursive(
-          schema[key],
-          doc[key],
-          modelName
-        );
-
-        if (checkCurrObj.err) throw new Error(checkCurrObj.errData);
-        doc[key] = checkCurrObj.doc;
-      }
+      else if (isSchemaRef(schema, schema[key]))
+        checkSchemaRefRecursive(doc, schema, key);
+      else if (Array.isArray(schema[key]))
+        checkArrayRecursive(doc, schema, key, modelName);
+      else if (isNestedObj(schema, doc, key))
+        checkNestedObj(doc, schema, key, modelName);
     }
 
     doc = constructObj(schema, doc);
     return { err: false, doc };
   } catch (err) {
     throw err;
+  }
+};
+
+const checkNestedObj = (
+  doc: any,
+  schema: any,
+  key: string,
+  modelName: string
+) => {
+  if (Array.isArray(doc[key]))
+    throw new Error(`cannot convery propery ${key} of type object to array`);
+
+  const checkCurrObj = checkModelRecursive(schema[key], doc[key], modelName);
+
+  if (checkCurrObj.err) throw new Error(checkCurrObj.errData);
+  doc[key] = checkCurrObj.doc;
+};
+
+const checkArrayRecursive = (
+  doc: any,
+  schema: any,
+  key: string,
+  modelName: string
+) => {
+  if (!Array.isArray(doc[key]))
+    throw new Error(`cannot convery propery ${key} of type array to object`);
+
+  doc[key].forEach((x: any) => {
+    const checkRecursive = checkModelRecursive(schema[key][0], x, modelName);
+    if (checkRecursive.err) throw new Error(checkRecursive.errData);
+
+    x = checkRecursive.doc;
+  });
+};
+
+const checkSchemaRefRecursive = (doc: any, schema: any, key: string): void => {
+  if (
+    typeof doc[key] !== "undefined" &&
+    schema[key].isArray !== Array.isArray(doc[key])
+  )
+    throw new Error("incorrect array type");
+
+  if (schema[key].isArray) {
+    const newArr: any[] = [];
+
+    doc[key].forEach((x: any, i: number) => {
+      const newObj = checkModelRecursive(
+        schema[key].schema,
+        x || {},
+        schema[key].modelName
+      );
+      if (newObj.err) throw new Error(newObj.errData);
+
+      newArr[i] = newObj.doc;
+    });
+
+    doc[key] = newArr;
+  } else {
+    if (typeof doc[key] !== "object")
+      throw new Error("incorrect data type declared");
+
+    const newObj = checkModelRecursive(
+      schema[key].schema,
+      doc[key] || {},
+      schema[key].modelName
+    );
+
+    if (newObj.err) throw new Error(newObj.errData);
+    doc[key] = newObj.doc;
   }
 };
 
@@ -108,13 +119,13 @@ export const checkModelOptions = (
           err: `type ${schema[key].type} doesn't equal type ${typeof doc[key]}`,
         };
     } else if (isSchemaRef(schema, schema[key] || {})) {
-      if (schema[key].isArray) {
-        const checkArray = checkArrayOptions(doc[key], schema[key]);
-        if (checkArray.err) return { err: checkArray.err };
-      } else {
-        const checkModel = checkModelOptions(doc[key], schema[key].schema);
-        if (checkModel.err) return { err: checkModel.err };
-      }
+      const checkSchemaRef: { err: string | boolean } = checkSchemaRefOptions(
+        doc,
+        schema,
+        key
+      );
+
+      if (checkSchemaRef.err) return { err: checkSchemaRef.err };
     } else if (Array.isArray(schema[key])) {
       for (let j = 0; j < doc[key].length; j++) {
         const checkOptionsRecursive: {
@@ -132,6 +143,22 @@ export const checkModelOptions = (
   return { err: false };
 };
 
+const checkSchemaRefOptions = (
+  doc: any,
+  schema: any,
+  key: string
+): { err: string | boolean } => {
+  if (schema[key].isArray) {
+    const checkArray = checkArrayOptions(doc[key], schema[key]);
+    if (checkArray.err) return { err: checkArray.err };
+  } else {
+    const checkModel = checkModelOptions(doc[key], schema[key].schema);
+    if (checkModel.err) return { err: checkModel.err };
+  }
+
+  return { err: false };
+};
+
 const checkArrayOptions = (
   docs: any[],
   schema: any
@@ -142,63 +169,4 @@ const checkArrayOptions = (
     if (checkModel.err) return { err: checkModel.err };
   }
   return { err: false };
-};
-
-// check if update query is valid
-export const checkUpdateProps = (
-  schema: any,
-  updateQuery: any,
-  modelName: string
-): { err: string } => {
-  const updateKeys = Object.keys(updateQuery);
-
-  for (let idx = 0; idx < updateKeys.length; idx++) {
-    const key: string = updateKeys[idx];
-
-    if (Array.isArray(schema[key])) return { err: "can't update array" };
-
-    if (!(updateKeys[idx] in schema))
-      return {
-        err: `property ${key} does not exists on ${modelName} schema`,
-      };
-
-    if (isOptionsObj(schema[key])) {
-      if (typeof updateQuery[key] === "object")
-        return { err: "can't change type" };
-
-      if (
-        schema[key].required &&
-        (typeof updateQuery[key] == "undefined" || updateQuery[key] == null)
-      )
-        return { err: `property ${key} is required` };
-    } else if (isSchemaRef(schema, schema[key])) {
-      if (schema[key].isArray) return { err: "can't update array type" };
-      else {
-        const checkRecursive: { err: string } = checkUpdateProps(
-          schema[key],
-          updateQuery[key],
-          modelName
-        );
-        if (checkRecursive.err) return { err: checkRecursive.err };
-      }
-    } else if (isNestedObj(schema, updateQuery, key)) {
-      const checkRecursive: { err: string } = checkUpdateProps(
-        schema[key],
-        updateQuery[key],
-        modelName
-      );
-
-      if (checkRecursive.err) return { err: checkRecursive.err };
-    } else {
-      let isCorrectType = false;
-
-      Object.keys(schema[key]).forEach((schemaKey: string) => {
-        if (typeof updateQuery[schemaKey] !== "undefined") isCorrectType = true;
-      });
-
-      if (!isCorrectType) return { err: "incorrect type" };
-    }
-  }
-
-  return { err: "" };
 };

@@ -1,8 +1,5 @@
-import {
-  checkModelRecursive,
-  checkUpdateProps,
-} from "./utils/model/checkModel";
-// import { constructObj } from "./utils/model/constructModel";
+import { checkModelRecursive } from "./utils/model/checkModel";
+import { checkUpdateProps } from "./utils/model/checkUpdateProps";
 import { parseFindParams, parseUpdateParams } from "./utils/parseParams";
 import * as apiReqs from "./utils/serverRequests";
 
@@ -52,8 +49,6 @@ export class Model {
       #createDoc = () => {
         delete this.doc._id;
 
-        // this.doc = constructObj(this.schema, this.doc);
-
         const checkModel = checkModelRecursive(
           this.schema,
           this.doc,
@@ -83,14 +78,14 @@ export class Model {
       throw new Error("Limit can't be 0");
     }
 
-    return apiReqs.findDocs(this.modelName, parsedSearchParams);
+    return apiReqs.findDocs(this.modelName, parsedSearchParams, this.schema);
   }
 
   findOne(searchQuery: any, options: any, cb: any) {
     const parsedSearchParams = parseFindParams(searchQuery, options, cb);
     parsedSearchParams.options.limit = 1;
 
-    return apiReqs.findDocs(this.modelName, parsedSearchParams);
+    return apiReqs.findDocs(this.modelName, parsedSearchParams, this.schema);
   }
 
   findAndUpdate(searchQuery: any, updateQuery: any, options: any, cb: any) {
@@ -100,6 +95,7 @@ export class Model {
       options,
       cb
     );
+    if (updateParams.err) return;
 
     return apiReqs.updateDocs(this.modelName, updateParams);
   }
@@ -111,6 +107,7 @@ export class Model {
       options,
       cb
     );
+    if (updateParams.err) return;
 
     updateParams.options.limit = 1;
     return apiReqs.updateDocs(this.modelName, updateParams);
@@ -128,6 +125,7 @@ export class Model {
       options,
       cb
     );
+    if (typeof updateParams == "undefined") return { err: true };
 
     const checkUpdate: { err: string } = checkUpdateProps(
       this.schema,
