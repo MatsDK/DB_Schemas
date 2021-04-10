@@ -21,6 +21,26 @@ interface dataFileDBType {
   rows: any[];
 }
 
+router.get("/getData", (req: Request, res: Response) => {
+  const data: any = BSON.deserialize(fs.readFileSync(`${DATA_FOLDER}data`));
+  res.json(data);
+});
+
+router.get("/getData/:id", (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const dbs: dataFileDBType[] = BSON.deserialize(
+    fs.readFileSync(`${DATA_FOLDER}data`)
+  ).dbs;
+
+  const thisDB: dataFileDBType | undefined = dbs.find(
+    (db: dataFileDBType) => db.dbId === id
+  );
+  if (!thisDB) return res.json({ err: "db not found" });
+
+  res.json(thisDB);
+});
+
 router.post("/insertDoc", (req: Request, res: Response) => {
   try {
     const { modelName, schema, doc }: insertDocBody = req.body;

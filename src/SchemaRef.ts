@@ -9,11 +9,14 @@ export class SchemaRef {
       schema: any;
       model: any;
       modelName: string;
+      _isSchemaRef: boolean;
+
       constructor(schemaName: string, { isArray }: SchemaRefOptionsProps) {
         this.schema = schema;
         this.modelName = schemaName;
         this.isArray = isArray;
         this.model = new Model(schema, "");
+        this._isSchemaRef = true;
       }
     };
   }

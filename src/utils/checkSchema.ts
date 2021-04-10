@@ -2,11 +2,24 @@ import { isOptionsObj, isSchemaRef } from "./helpers";
 
 const types: string[] = ["string", "number", "boolean"];
 
+const ModelProperties: string[] = [
+  "_save",
+  "_update",
+  "_id",
+  "_modelName",
+  "_schema",
+  "_doc",
+  "_isSchemaRef",
+];
+
 // check if declared options are correct on Model
 export const checkSchemaOptions = (schema: any) => {
   const schemaKeys: string[] = Object.keys(schema);
   for (let idx = 0; idx < schemaKeys.length; idx++) {
     const schemaKey: string = schemaKeys[idx];
+
+    if (ModelProperties.includes(schemaKey))
+      return { err: `propery ${schemaKey} can't be declared on schema` };
 
     if (isOptionsObj(schema[schemaKey])) {
       const { err } = checkOption(schema, schemaKey);

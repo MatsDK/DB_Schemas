@@ -4,8 +4,131 @@ body,
 .app {
   font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
     Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
-  overflow: hidden;
   margin: 0;
+  overflow: auto;
   height: 100%;
   width: 100%;
+  -ms-user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -khtml-user-select: none;
+  user-select: none;
+  background-color: var(--mainBG);
+  color: var(--mainTextColor);
+}
+
+:root {
+  --mainBG: #131213;
+  --secondaryBG: #222122;
+  --mainTextColor: #fffefe;
+  --secondaryTextColor: #bbbbbb;
+  --accentColor: #018eff;
+  --lighterAccentColor: #006bc2cb;
+  --lightAccentColor: #152130;
+}
+
+table {
+  background-color: var(--mainBG);
+  width: 100%;
+  display: grid;
+  border-radius: 0;
+  overflow: auto;
+  padding-right: 10px;
+}
+
+table thead,
+table tbody,
+table tr {
+  display: contents;
+  color: var(--secondaryTextColor);
+}
+
+table th {
+  position: relative;
+  font-size: 18px;
+
+  color: var(--mainTextColor);
+
+  height: 48px;
+  padding: 0 !important;
+  padding-left: 10px !important;
+  border-top: 1px solid var(--secondaryBG) !important;
+  border-bottom: 1px solid var(--secondaryBG) !important;
+}
+table th span p {
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+table th span .header-type {
+  font-weight: normal;
+  font-size: 15px;
+  padding-bottom: 3px;
+}
+
+table th,
+table td {
+  cursor: pointer;
+  border-bottom: 0.5px solid var(--secondaryBG);
+  border-top: 0.5px solid var(--secondaryBG);
+  border-right: 1px solid var(--secondaryBG);
+  text-align: left;
+  padding: 5px 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 20px;
+}
+
+table th span,
+table td span {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  display: block;
+}
+
+.idx-column {
+  text-align: center;
+  color: var(--mainTextColor);
+}
+
+.resize-handle {
+  display: block;
+  position: absolute;
+  cursor: col-resize;
+  width: 7px;
+  right: 0;
+  top: 0;
+  z-index: 1;
+  border-right: 2px solid transparent;
+}
+
+.resize-handle:hover {
+  border-color: #ccc;
+}
+
+.resize-handle.active {
+  border-color: var(--lighterAccentColor);
+}
+
+.table-wrapper {
+  margin-bottom: 25px;
+  background: #fff;
+  overflow: hidden;
+}
+
+table tbody tr:hover td {
+  border-top: 1px solid var(--lighterAccentColor) !important;
+  border-bottom: 1px solid var(--lighterAccentColor) !important;
+}
+
+table tbody tr:hover .idx-column {
+  color: var(--accentColor);
+}
+table tr {
+  line-height: 25px !important;
 }

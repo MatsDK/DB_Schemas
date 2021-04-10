@@ -3,15 +3,6 @@ import { ModelReturnProps } from "./SchemaInterfaces";
 import { SchemaRef } from "./SchemaRef";
 import { checkSchemaOptions } from "./utils/checkSchema";
 
-const ModelProperties: string[] = [
-  "_save",
-  "_update",
-  "_id",
-  "_modelName",
-  "_schema",
-  "_doc",
-];
-
 export class Schema {
   obj: any;
   SchemaRef: any;
@@ -25,11 +16,6 @@ export class Schema {
   }
 
   #checkSchema = () => {
-    Object.keys(this.obj).forEach((x) => {
-      if (ModelProperties.includes(x))
-        throw new Error(`can't have property ${x} on Schema`);
-    });
-
     const checkOptions: any = checkSchemaOptions(this.obj);
     if (checkOptions.err) throw new Error(checkOptions.err);
   };
