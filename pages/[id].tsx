@@ -1,6 +1,6 @@
 import axios from "axios";
 import Link from "next/link";
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 const MIN_CEL_WIDTH: number = 40;
 const createHeaders = (headers: any[]) => {
@@ -11,16 +11,20 @@ const createHeaders = (headers: any[]) => {
 };
 
 const id = ({ data }) => {
+  if (!data) return <div></div>;
+
   const [headers] = useState<string[]>([
     "",
     "_id",
     ...Object.keys(data?.schema || {}),
   ]);
+  const rows = useRef(data.rows.map(() => React.createRef()));
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const tableElement = useRef<HTMLTableElement>(null);
   const columns = createHeaders(headers);
+  const [activeRow, setActiveRowIdx] = useState<number | null>(null);
 
-  const mouseDown = (index) => {
+  const mouseDown = (index: number) => {
     setActiveIndex(index);
   };
 
@@ -65,7 +69,21 @@ const id = ({ data }) => {
     };
   }, [activeIndex, mouseMove, mouseUp, removeListeners]);
 
-  return data ? (
+  const setActiveRow = (idx: number) => {
+    rows.current.forEach((rowEl: any) => {
+      rowEl.current.classList.remove("activeRow");
+    });
+
+    if (activeRow === idx) {
+      rows.current[idx].current.classList.remove("activeRow");
+      setActiveRowIdx(null);
+    } else {
+      rows.current[idx].current.classList.add("activeRow");
+      setActiveRowIdx(idx);
+    }
+  };
+
+  return data && rows ? (
     <div>
       <div>{data.dbName}</div>
       <Link href="/">hello world</Link>
@@ -111,10 +129,18 @@ const id = ({ data }) => {
             {data &&
               data.rows.map((row: any, i: number) => {
                 return (
-                  <tr className="dataTableRow" key={row._id}>
+                  <tr
+                    className="dataTableRow"
+                    key={row._id}
+                    ref={rows.current[i]}
+                    onClick={() => setActiveRow(i)}
+                  >
                     {headers.map((key: string, idx: number) => {
                       if (data.schema[key] && data.schema[key]._isSchemaRef)
                         return <td key={idx}>Schema Object</td>;
+
+                      if (Array.isArray(data.schema[key]))
+                        return <td key={idx}>Array</td>;
 
                       return (
                         <td className={idx === 0 ? "idx-column" : ""} key={idx}>
@@ -134,18 +160,18 @@ const id = ({ data }) => {
   );
 };
 
-id.getInitialProps = async ({ query }) => {
+id.getInitialProps = async ({ query, res }) => {
   const { id }: { id: string } = query;
+  if (id == "favicon.ico") return { data: undefined };
 
-  const res = await axios({
+  const data = await axios({
     method: "GET",
     url: `http://localhost:3001/api/getData/${id}`,
   }).then((res) => {
     return res.data;
   });
-
   if (res.err) return { data: undefined };
-  return { data: res };
+  return { data };
 };
 
 export default id;
