@@ -17,13 +17,13 @@ const userSchema = new Schema({
 
 const userModel = userSchema.Model("user");
 
-// userModel.findAndUpdate(
-//   { _id: "YBrHsPhlMERrRQTZcMK5d" },
-//   { name: "test21212121212121" },
-//   (updatedData: any[], err: any) => {
-//     console.log(updatedData, err);
-//   }
-// );
+userModel.findAndUpdate(
+  { name: "userName" },
+  { name: "newName" },
+  (updatedData: any[], err: any) => {
+    console.log(updatedData, err);
+  }
+);
 
 // userModel.find((rows: any[], err: any) => {
 //   if (err) throw err;
@@ -46,15 +46,15 @@ const userModel = userSchema.Model("user");
 //   }
 // );
 
-const newUser = new userModel.Model({
-  name: "userName",
-  messages: [{ text: { name: "testName", age: 21 } }],
-  age: 21,
-  messages1: [{ name: true }],
-});
+// const newUser = new userModel.Model({
+//   name: "userName",
+//   messages: [{ text: { name: "testName", age: 21 } }],
+//   age: 21,
+//   messages1: [{ name: true }],
+// });
 
-console.log(newUser);
+// console.log(newUser);
 
-newUser._save((res: any, err: any) => {
-  console.log(res, err);
-});
+// newUser._save((res: any, err: any) => {
+//   console.log(res, err);
+// });

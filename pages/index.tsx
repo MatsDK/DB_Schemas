@@ -1,6 +1,6 @@
 import axios from "axios";
 import Link from "next/link";
-import React, { useEffect } from "react";
+import React from "react";
 
 interface dbType {
   rows: any[];
@@ -10,10 +10,6 @@ interface dbType {
 }
 
 const Index = ({ data }): JSX.Element => {
-  useEffect(() => {
-    console.log(data);
-  }, []);
-
   return (
     <div>
       {data.map((db: dbType, i: number) => {

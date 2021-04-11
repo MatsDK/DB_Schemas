@@ -135,6 +135,7 @@ table tr {
 .activeRow td {
   border-top: 1px solid var(--lighterAccentColor) !important;
   border-bottom: 1px solid var(--lighterAccentColor) !important;
+  background-color: var(--lightAccentColor);
 }
 .activeRow .idx-column {
   color: var(--accentColor);

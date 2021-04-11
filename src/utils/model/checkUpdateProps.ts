@@ -27,6 +27,13 @@ export const checkUpdateProps = (
         (typeof updateQuery[key] == "undefined" || updateQuery[key] == null)
       )
         return { err: `property ${key} is required` };
+
+      if (schema[key].type != typeof updateQuery[key])
+        return {
+          err: `type ${
+            schema[key].type
+          } doesn't equal type ${typeof updateQuery[key]}`,
+        };
     } else if (isSchemaRef(schema, schema[key])) {
       if (schema[key].isArray) return { err: "can't update array type" };
       else {

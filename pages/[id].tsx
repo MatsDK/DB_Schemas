@@ -4,11 +4,18 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 
 const MIN_CEL_WIDTH: number = 40;
 const createHeaders = (headers: any[]) => {
-  return headers.map((item: any) => ({
-    contents: item,
-    ref: useRef<HTMLTableHeaderCellElement>(null),
-  }));
+  return headers.map(
+    (item: any): headerType => ({
+      contents: item,
+      ref: useRef<HTMLTableHeaderCellElement>(null),
+    })
+  );
 };
+
+interface headerType {
+  contents: string;
+  ref: React.RefObject<HTMLTableCellElement>;
+}
 
 const id = ({ data }) => {
   if (!data) return <div></div>;
@@ -21,7 +28,7 @@ const id = ({ data }) => {
   const rows = useRef(data.rows.map(() => React.createRef()));
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
   const tableElement = useRef<HTMLTableElement>(null);
-  const columns = createHeaders(headers);
+  const columns: headerType[] = createHeaders(headers);
   const [activeRow, setActiveRowIdx] = useState<number | null>(null);
 
   const mouseDown = (index: number) => {
@@ -70,9 +77,7 @@ const id = ({ data }) => {
   }, [activeIndex, mouseMove, mouseUp, removeListeners]);
 
   const setActiveRow = (idx: number) => {
-    rows.current.forEach((rowEl: any) => {
-      rowEl.current.classList.remove("activeRow");
-    });
+    clearSelectedRows();
 
     if (activeRow === idx) {
       rows.current[idx].current.classList.remove("activeRow");
@@ -81,6 +86,12 @@ const id = ({ data }) => {
       rows.current[idx].current.classList.add("activeRow");
       setActiveRowIdx(idx);
     }
+  };
+
+  const clearSelectedRows = () => {
+    rows.current.forEach((rowEl: any) => {
+      rowEl.current.classList.remove("activeRow");
+    });
   };
 
   return data && rows ? (
@@ -107,10 +118,16 @@ const id = ({ data }) => {
                       <span>
                         <p>{contents}</p>
                         <p className="header-type">
-                          {data.schema[contents] &&
-                          data.schema[contents]._isSchemaRef
-                            ? data.schema[contents].modelName + " Schema"
-                            : contents && "type"}
+                          {idx === 0
+                            ? ""
+                            : idx !== 1
+                            ? data.schema[contents] &&
+                              data.schema[contents]._isSchemaRef
+                              ? data.schema[contents].modelName + " Schema"
+                              : Array.isArray(data.schema[contents])
+                              ? "Array"
+                              : data.schema[contents].type
+                            : "id"}
                         </p>
                       </span>
                       <div
@@ -160,9 +177,9 @@ const id = ({ data }) => {
   );
 };
 
-id.getInitialProps = async ({ query, res }) => {
+id.getInitialProps = async ({ query }) => {
   const { id }: { id: string } = query;
-  if (id == "favicon.ico") return { data: undefined };
+  // if (id == "favicon.ico") return { data: undefined };
 
   const data = await axios({
     method: "GET",
@@ -170,7 +187,8 @@ id.getInitialProps = async ({ query, res }) => {
   }).then((res) => {
     return res.data;
   });
-  if (res.err) return { data: undefined };
+
+  if (data?.err || !data) return { data: undefined };
   return { data };
 };
 
