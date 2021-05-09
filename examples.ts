@@ -9,8 +9,6 @@ const Client = new DbClient({
   port: 1234,
 });
 
-console.log(Client);
-
 const dataBase: DataBase = Client.connect((err, res) => {
   if (err) throw err;
   console.log(res);
