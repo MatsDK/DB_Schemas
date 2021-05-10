@@ -1,4 +1,4 @@
-import { DataBase } from "./DataBase";
+import { CollectionsManagerObj, DataBase } from "./DataBase";
 
 export interface optionsType {
   userName: string;
@@ -22,11 +22,46 @@ export class DbClient {
   }
 }
 
-const obj: any = {
+const obj: CollectionsManagerObj = {
   users: {
-    test: "fjdskl",
+    _id: "d89e69d8-9c2d-44bb-a117-17e5117fbae7",
+    _name: "users",
+    schema: {
+      properties: [
+        {
+          name: "name",
+          instanceOf: "String",
+          maxLength: 100,
+          required: false,
+          unique: false,
+          default: undefined,
+        },
+        {
+          name: "age",
+          instanceOf: "String",
+          maxLength: undefined,
+          required: false,
+          unique: false,
+          default: undefined,
+        },
+      ],
+    },
   },
   posts: {
-    test: "2",
+    _id: "ee9e69d8-9c2d-44bb-a117-17e5117fbae7",
+
+    _name: "posts",
+    schema: {
+      properties: [
+        {
+          name: "content",
+          maxLength: 100,
+          instanceOf: "Any",
+          required: true,
+          unique: true,
+          default: "content",
+        },
+      ],
+    },
   },
 };
