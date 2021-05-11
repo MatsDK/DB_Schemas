@@ -5,6 +5,9 @@ export interface PropertyType {
   required: boolean;
   default: any;
   instanceOf: string;
+  properties: PropertyType[];
+  isArray: boolean;
+  isObject: boolean;
 }
 
 export interface SchemaType {

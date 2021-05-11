@@ -8,4 +8,16 @@ export const defaultPropertyObj: PropertyType = {
   unique: false,
   required: false,
   default: undefined,
+  properties: [],
+  isObject: false,
+  isArray: false,
 };
+
+export const optionsObjProps: string[] = [
+  "type",
+  "default",
+  "max",
+  "unique",
+  "required",
+  "default",
+];

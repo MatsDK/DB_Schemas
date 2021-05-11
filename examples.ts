@@ -15,7 +15,6 @@ const dataBase: DataBase = Client.connect((err, res) => {
   console.log(res);
 });
 
-// console.log(
 // dataBase.createCollection({
 //   name: "users",
 //   schema: new Schema({
@@ -23,11 +22,14 @@ const dataBase: DataBase = Client.connect((err, res) => {
 //     age: Number,
 //   }),
 // })
-// );
+const PostSchema = new Schema({
+  content: String,
+});
 
 new Schema({
-  name: String,
-  age: { type: Number, default: 0 },
+  name: { firstName: {}, lastName: [String] },
+  age: { type: Number, unique: true, default: 0 },
 
-  email: { addres: String },
+  posts: [PostSchema],
 });
+// console.log(dataBase.collections.users.schema);

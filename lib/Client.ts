@@ -29,20 +29,26 @@ const obj: CollectionsManagerObj = {
     schema: {
       properties: [
         {
+          properties: [],
+          isArray: false,
           name: "name",
           instanceOf: "String",
           maxLength: 100,
           required: false,
           unique: false,
           default: undefined,
+          isObject: false,
         },
         {
+          properties: [],
+          isArray: false,
           name: "age",
           instanceOf: "String",
           maxLength: undefined,
           required: false,
           unique: false,
           default: undefined,
+          isObject: false,
         },
       ],
     },
@@ -54,12 +60,15 @@ const obj: CollectionsManagerObj = {
     schema: {
       properties: [
         {
+          properties: [],
+          isArray: false,
           name: "content",
           maxLength: 100,
           instanceOf: "Any",
           required: true,
           unique: true,
           default: "content",
+          isObject: false,
         },
       ],
     },

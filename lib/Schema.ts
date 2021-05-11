@@ -1,5 +1,5 @@
-import { PropertyType, SchemaType } from "./Collection";
-import { defaultPropertyObj, types } from "./utils/constants";
+import { SchemaType } from "./Collection";
+import { constructSchema } from "./utils/constructSchema";
 
 interface NewSchemaType {
   obj: any;
@@ -7,32 +7,13 @@ interface NewSchemaType {
 
 export class Schema implements NewSchemaType {
   obj: any;
+  _schema: any;
 
   constructor(obj: any) {
-    const objKeys: string[] = Object.keys(obj);
-    const schemaObj: SchemaType = { properties: [] };
+    const schemaObj: SchemaType = constructSchema(obj);
 
-    for (let key of objKeys) {
-      // Check if type directly declared in schema
-      if (typeof obj[key] === "function" && types.includes(obj[key].name)) {
-        const thisPropertyType: string | undefined = types.find(
-          (_: string) => _ === obj[key].name
-        );
-
-        schemaObj.properties.push({
-          ...defaultPropertyObj,
-          name: key,
-          instanceOf: thisPropertyType || "Any",
-        });
-
-        continue;
-      }
-
-      console.log(key, obj[key], obj[key]);
-      // Check if options Object is declared
-    }
-
-    console.log(schemaObj);
+    console.log(schemaObj.properties[0]);
+    this._schema = schemaObj;
     this.obj = obj;
   }
 }
