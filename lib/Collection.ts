@@ -1,32 +1,21 @@
-export interface PropertyType {
-  name: string;
-  maxLength: number | undefined;
-  unique: boolean;
-  required: boolean;
-  default: any;
-  instanceOf: string;
-  properties: PropertyType[];
-  isArray: boolean;
-  isObject: boolean;
-}
-
-export interface SchemaType {
-  properties: Array<PropertyType>;
-}
-
-export interface collectionObj {
-  schema: SchemaType;
-  _id: string;
-  _name: string;
-}
+import {
+  collectionObj,
+  optionsType,
+  PropertyType,
+  SchemaType,
+} from "./utils/types";
 
 export class Collection {
   schema: CollectionSchema;
   _id: string;
+  #options: optionsType;
+  #obj: collectionObj;
 
-  constructor(obj: collectionObj) {
+  constructor(obj: collectionObj, options: optionsType) {
     this.schema = new CollectionSchema(obj.schema);
+    this.#options = options;
     this._id = obj._id;
+    this.#obj = obj;
   }
 
   findMany() {

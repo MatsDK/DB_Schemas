@@ -1,14 +1,12 @@
-import { CollectionsManagerObj, DataBase } from "./DataBase";
+import { DataBase } from "./DataBase";
+import { getDataBase } from "./utils/data/getDataBase";
+import {
+  CollectionsManagerObj,
+  dataBaseData,
+  optionsType,
+} from "./utils/types";
 
-export interface optionsType {
-  userName: string;
-  passWord: string;
-  host: string;
-  database: string;
-  port: number;
-}
-
-export class DbClient {
+export class Client {
   options: optionsType;
 
   constructor(options: optionsType) {
@@ -16,61 +14,15 @@ export class DbClient {
   }
 
   connect(cb?: (err: any, res: any) => void) {
-    if (cb) cb(null, "> Connected to Database");
+    const db: any = getDataBase(this.options);
+    if (db.err) {
+      if (cb) return cb(db.err, null);
+      return console.error(db.err);
+    }
 
-    return new DataBase(obj, this.options);
+    const { Collections: collections } = db;
+
+    if (cb) cb(null, "> Connected to Database");
+    return new DataBase(collections, this.options);
   }
 }
-
-const obj: CollectionsManagerObj = {
-  users: {
-    _id: "d89e69d8-9c2d-44bb-a117-17e5117fbae7",
-    _name: "users",
-    schema: {
-      properties: [
-        {
-          properties: [],
-          isArray: false,
-          name: "name",
-          instanceOf: "String",
-          maxLength: 100,
-          required: false,
-          unique: false,
-          default: undefined,
-          isObject: false,
-        },
-        {
-          properties: [],
-          isArray: false,
-          name: "age",
-          instanceOf: "String",
-          maxLength: undefined,
-          required: false,
-          unique: false,
-          default: undefined,
-          isObject: false,
-        },
-      ],
-    },
-  },
-  posts: {
-    _id: "ee9e69d8-9c2d-44bb-a117-17e5117fbae7",
-
-    _name: "posts",
-    schema: {
-      properties: [
-        {
-          properties: [],
-          isArray: false,
-          name: "content",
-          maxLength: 100,
-          instanceOf: "Any",
-          required: true,
-          unique: true,
-          default: "content",
-          isObject: false,
-        },
-      ],
-    },
-  },
-};

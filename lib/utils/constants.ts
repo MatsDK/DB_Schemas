@@ -1,4 +1,4 @@
-import { PropertyType } from "../Collection";
+import { collectionObj, PropertyType } from "./types";
 
 export const types: string[] = ["String", "Boolean", "Number", "Any"];
 export const defaultPropertyObj: PropertyType = {
@@ -21,3 +21,12 @@ export const optionsObjProps: string[] = [
   "required",
   "default",
 ];
+
+export const defaultCollectionObj: collectionObj = {
+  _id: "",
+  _name: "",
+  _strict: false,
+  schema: {
+    properties: [],
+  },
+};

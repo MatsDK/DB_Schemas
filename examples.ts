@@ -1,35 +1,34 @@
-import { DbClient } from "./lib/Client";
+import { Client } from "./lib/Client";
 import { DataBase } from "./lib/DataBase";
 import { Schema } from "./lib/Schema";
 
-const Client = new DbClient({
+const dbClient = new Client({
   database: "Users",
   host: "127.0.0.1",
-  userName: "mats",
-  passWord: "mats",
+  userName: "user",
+  passWord: "password",
   port: 1234,
 });
 
-const dataBase: DataBase = Client.connect((err, res) => {
-  if (err) throw err;
+const dataBase = dbClient.connect((err, res) => {
+  if (err) return console.log("Error: " + err);
   console.log(res);
 });
 
-// dataBase.createCollection({
-//   name: "users",
-//   schema: new Schema({
-//     name: String,
-//     age: Number,
-//   }),
-// })
-const PostSchema = new Schema({
-  content: String,
-});
+if (dataBase instanceof DataBase) {
+  // const PostSchema: Schema = new Schema({
+  //   content: String,
+  //   comments: [{ text: { type: String, default: "" }, timeStamp: String }],
+  // });
 
-new Schema({
-  name: { firstName: {}, lastName: [String] },
-  age: { type: Number, unique: true, default: 0 },
+  // const userSchema: Schema = new Schema({
+  //   name: { firstName: {}, lastName: [String] },
+  //   age: { type: Number, unique: true, default: 0 },
 
-  posts: [PostSchema],
-});
-// console.log(dataBase.collections.users.schema);
+  //   posts: [PostSchema],
+  // });
+
+  // dataBase.createCollection({ name: "user", schema: userSchema });
+
+  console.log(dataBase.collections);
+}
