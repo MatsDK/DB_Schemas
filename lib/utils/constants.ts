@@ -1,5 +1,6 @@
-import { collectionObj, PropertyType } from "./types";
+import { collectionObj, PropertyType } from "./../types";
 
+export const forbiddenProps: string[] = ["_save", "_id"];
 export const types: string[] = ["String", "Boolean", "Number", "Any"];
 export const defaultPropertyObj: PropertyType = {
   name: "",

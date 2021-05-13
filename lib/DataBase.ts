@@ -5,9 +5,10 @@ import {
   CollectionsManagerObj,
   createCollObjType,
   optionsType,
-} from "./utils/types";
+} from "./types";
 import { v4 as uuid } from "uuid";
 import { createCollection } from "./utils/data/createCollection";
+import { Document } from "./Document";
 
 export class DataBase {
   collections: CollectionsManager;
@@ -41,15 +42,14 @@ export class DataBase {
       newCollectionObj,
       this.options
     );
+
     if (newCollection.err) {
       if (cb) return cb(newCollection.err, null);
       return console.error(newCollection.err);
     }
-    if (newCollection.collections)
-      this.collections = new CollectionsManager(
-        newCollection.collections,
-        this.options
-      );
+
+    const { data } = newCollection;
+    if (data) this.collections = new CollectionsManager(data, this.options);
 
     if (cb) cb(null, `Created collection '${newCollectionObj._name}'`);
     return `Created collection '${newCollectionObj._name}'`;

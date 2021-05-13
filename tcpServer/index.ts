@@ -1,12 +1,46 @@
 import net from "net";
 import { eventHandler } from "./EventHandler";
+import BSON from "bson";
+import path from "path";
+import fs from "fs";
+import { dataBaseData } from "../types";
 
 const handleEvents = new eventHandler();
 
-handleEvents.on("getDatabaseData", (data: any) => {
-  console.log(data);
-  return { user: "fjdskl" };
+handleEvents.on("getDatabaseData", ({ db }: { db: any }) => {
+  const dbs: any = BSON.deserialize(
+    fs.readFileSync(path.resolve(__dirname, "../data/data"))
+  );
+
+  const thisDb: undefined | dataBaseData = dbs.dbs[db.toLowerCase()];
+  if (!thisDb) return { err: `Database ${db} not found` };
+
+  return thisDb;
 });
+
+handleEvents.on(
+  "createCollection",
+  ({ db, newCollectionObj }: { db: string; newCollectionObj: any }) => {
+    const dbs: any = BSON.deserialize(
+      fs.readFileSync(path.resolve(__dirname, "../data/data"))
+    );
+    const thisDb: undefined | dataBaseData = dbs.dbs[db.toLowerCase()];
+    if (!thisDb) return { err: `Database '${db}' not found` };
+
+    if (thisDb.Collections[newCollectionObj._name.toLowerCase()])
+      return {
+        err: `Collection with name '${newCollectionObj._name}' already exists`,
+      };
+
+    thisDb.Collections[newCollectionObj._name.toLowerCase()] = newCollectionObj;
+    fs.writeFileSync(
+      path.resolve(__dirname, "../data/data"),
+      BSON.serialize(dbs)
+    );
+
+    return { err: false, data: thisDb.Collections };
+  }
+);
 
 const server = net.createServer((conn) => {
   conn.on("data", (data) => {

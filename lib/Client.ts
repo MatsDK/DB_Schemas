@@ -1,10 +1,6 @@
 import { DataBase } from "./DataBase";
-import { getDataBase } from "./utils/data/getDataBase";
-import {
-  CollectionsManagerObj,
-  dataBaseData,
-  optionsType,
-} from "./utils/types";
+import { getDataBase } from "./utils/data/queryData";
+import { optionsType } from "./types";
 
 export class Client {
   options: optionsType;

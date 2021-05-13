@@ -1,5 +1,5 @@
 import { constructSchema } from "./utils/constructSchema";
-import { SchemaType, NewSchemaType } from "./utils/types";
+import { SchemaType, NewSchemaType } from "./types";
 
 export class Schema implements NewSchemaType {
   obj: any;

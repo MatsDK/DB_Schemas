@@ -1,6 +1,7 @@
 import { Client } from "./lib/Client";
 import { DataBase } from "./lib/DataBase";
 import { Schema } from "./lib/Schema";
+import { CollectionDocument } from "./lib/types";
 
 const dbClient = new Client({
   database: "users",
@@ -10,12 +11,12 @@ const dbClient = new Client({
   port: 2345,
 });
 
-const dataBase = dbClient.connect((err, res) => {
-  if (err) return console.log("Error: " + err);
-  console.log(res);
-});
+const test = async () => {
+  const db = await dbClient.connect((err, res) => {
+    if (err) return console.log("Error: " + err);
+    console.log(res);
+  });
 
-const test = async (db: any) => {
   if (db instanceof DataBase) {
     const PostSchema: Schema = new Schema({
       content: String,
@@ -32,13 +33,19 @@ const test = async (db: any) => {
     // await db.createCollection(
     //   { name: "user", schema: userSchema },
     //   (err, res) => {
-    //     if (err) return console.log("Error: " + err);
+    //     if (err) console.log("Error: " + err);
     //     console.log(res);
     //   }
     // );
 
-    console.log(db.collections, userSchema._schema.properties);
+    const newObject: CollectionDocument = new db.collections.user.document({
+      age: 0,
+    });
+
+    newObject._save();
+    db.collections.user.insertMany();
+    db.collections.user.insertOne();
   }
 };
 
-test(dataBase);
+test();

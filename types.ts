@@ -1,4 +1,4 @@
-import { Schema } from "../Schema";
+import { Schema } from "./lib/Schema";
 
 export interface optionsType {
   userName: string;

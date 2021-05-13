@@ -1,12 +1,20 @@
-import { defaultPropertyObj, optionsObjProps, types } from "./constants";
+import {
+  defaultPropertyObj,
+  forbiddenProps,
+  optionsObjProps,
+  types,
+} from "./constants";
 import { Schema } from "../Schema";
-import { PropertyType, SchemaType } from "./types";
+import { PropertyType, SchemaType } from "./../types";
 
 export const constructSchema = (obj: any): SchemaType => {
   let objKeys: string[] = Object.keys(obj),
     schemaObj: SchemaType = { properties: [] };
 
   for (let key of objKeys) {
+    if (forbiddenProps.includes(key.trim().toLowerCase()))
+      throw `Don't put the property ${key} on a Schema`;
+
     if (!obj[key]) continue;
 
     schemaObj = checkProperty(obj[key], key, schemaObj);

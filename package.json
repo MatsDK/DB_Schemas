@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon examples.ts",
-    "server": "nodemon tcpServer/index.ts",
+    "dev": "nodemon -w lib/ -w examples.ts examples.ts",
+    "server": "nodemon -w tcpServer/ tcpServer/index.ts",
     "build": "tsc --outDir ./build"
   },
   "repository": {
