@@ -18,9 +18,14 @@ export class DataBase {
     this.options = options;
   }
 
-  createCollection(createCollectionObj: createCollObjType) {
-    if (!createCollectionObj.name.trim())
-      return "Give a valid name for a collection";
+  async createCollection(
+    createCollectionObj: createCollObjType,
+    cb?: (err: any, res: any) => any
+  ): Promise<any> {
+    if (!createCollectionObj.name.trim()) {
+      if (cb) return cb("Give a valid name for a collection", null);
+      return console.error("Give a valid name for a collection");
+    }
 
     const newCollectionObj: collectionObj = {
       ...defaultCollectionObj,
@@ -32,14 +37,22 @@ export class DataBase {
     if (newCollectionObj._strict)
       newCollectionObj.schema = createCollectionObj.schema?._schema;
 
-    const newCollection = createCollection(newCollectionObj, this.options);
-    if (newCollection.err) return console.error(newCollection.err);
-
+    const newCollection = await createCollection(
+      newCollectionObj,
+      this.options
+    );
+    if (newCollection.err) {
+      if (cb) return cb(newCollection.err, null);
+      return console.error(newCollection.err);
+    }
     if (newCollection.collections)
       this.collections = new CollectionsManager(
         newCollection.collections,
         this.options
       );
+
+    if (cb) cb(null, `Created collection '${newCollectionObj._name}'`);
+    return `Created collection '${newCollectionObj._name}'`;
   }
 }
 

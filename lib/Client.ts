@@ -13,8 +13,8 @@ export class Client {
     this.options = options;
   }
 
-  connect(cb?: (err: any, res: any) => void) {
-    const db: any = getDataBase(this.options);
+  async connect(cb?: (err: any, res: any) => void) {
+    const db: any = await getDataBase(this.options);
     if (db.err) {
       if (cb) return cb(db.err, null);
       return console.error(db.err);

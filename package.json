@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon examples.ts",
+    "server": "nodemon tcpServer/index.ts",
     "build": "tsc --outDir ./build"
   },
   "repository": {

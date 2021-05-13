@@ -8,10 +8,10 @@ import fs from "fs";
 import BSON from "bson";
 import path from "path";
 
-export const createCollection = (
+export const createCollection = async (
   newCollectionObj: collectionObj,
   options: optionsType
-): { err: boolean | string; collections?: CollectionsManagerObj } => {
+): Promise<{ err: boolean | string; collections?: CollectionsManagerObj }> => {
   const dbs: any = BSON.deserialize(
     fs.readFileSync(path.resolve(__dirname, "../../../data/data"))
   );
