@@ -30,21 +30,22 @@ const test = async () => {
       posts: [PostSchema],
     });
 
-    // await db.createCollection(
-    //   { name: "user", schema: userSchema },
-    //   (err, res) => {
-    //     if (err) console.log("Error: " + err);
-    //     console.log(res);
-    //   }
-    // );
+    await db.createCollection(
+      { name: "user0", schema: userSchema },
+      (err, res) => {
+        if (err) console.log("Error: " + err);
+        console.log(res);
+      }
+    );
+    console.log(db.collections);
 
-    const newObject: CollectionDocument = new db.collections.user.document({
-      age: 0,
-    });
+    // const newObject: CollectionDocument = new db.collections.user.document({
+    //   age: 0,
+    // });
 
-    newObject._save();
-    db.collections.user.insertMany();
-    db.collections.user.insertOne();
+    // newObject._save();
+    // db.collections.user.insertMany();
+    // db.collections.user.insertOne();
   }
 };
 
