@@ -38,6 +38,11 @@ handleEvents.on(
       BSON.serialize(dbs)
     );
 
+    fs.writeFileSync(
+      path.resolve(__dirname, `../data/${thisDb._id}`),
+      BSON.serialize({ _id: thisDb._id, docs: [] })
+    );
+
     return { err: false, data: thisDb.Collections };
   }
 );

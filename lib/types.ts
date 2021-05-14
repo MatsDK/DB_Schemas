@@ -20,6 +20,10 @@ export interface PropertyType {
   isObject: boolean;
 }
 
+export interface schemaObj {
+  [key: string]: PropertyType;
+}
+
 export interface SchemaType {
   properties: Array<PropertyType>;
 }
