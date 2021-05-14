@@ -39,7 +39,7 @@ const test = async () => {
     // );
 
     db.collections.user0.insertOne(
-      { age: 0, name: { lastName: ["fdjksl"] } },
+      { posts: [{ content: "this is content" }] },
       (err: any, res: any) => {
         console.log(err, res);
       }
