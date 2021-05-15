@@ -66,7 +66,7 @@ export const constructDocument = (doc: any, props: Array<PropertyType>) => {
       }
     }
   }
-  // console.log(constructedDoc);
+
   return constructedDoc;
 };
 

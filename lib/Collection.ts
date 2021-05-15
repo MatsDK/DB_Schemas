@@ -1,6 +1,7 @@
 import { collectionObj, optionsType, PropertyType, SchemaType } from "./types";
 import { Document } from "./Document";
 import { constructDocument } from "./utils/constructDocument";
+import { insertData } from "./utils/data/insertData";
 
 export class Collection {
   schema: CollectionSchema;
@@ -21,13 +22,23 @@ export class Collection {
     };
   }
 
-  insertOne(obj: any, cb?: Function) {
+  insertOne(obj: any, cb?: (err: string, res: any) => void) {
     if (typeof obj !== "object" || obj == null)
       return console.error("Please give an objecy you wan't to insert");
 
+    let insertDoc: any = obj;
     if (this.#obj._strict) {
-      console.log(constructDocument(obj, this.#obj.schema.properties));
+      const constructedDoc = constructDocument(
+        obj,
+        this.#obj.schema.properties
+      );
+      if (constructedDoc.err) return console.log(constructedDoc.err);
+
+      insertDoc = constructedDoc;
     }
+
+    // console.log(insertDoc);
+    insertData([insertDoc]);
   }
 
   insertMany() {

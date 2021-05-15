@@ -55,4 +55,5 @@ export interface dataBaseData {
 
 export interface CollectionDocument {
   _save: Function;
+  [key: string]: any;
 }

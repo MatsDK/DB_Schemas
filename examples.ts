@@ -22,14 +22,11 @@ const test = async () => {
     //   content: String,
     //   comments: [{ text: { type: String, default: "" }, timeStamp: String }],
     // });
-
     // const userSchema: Schema = new Schema({
     //   name: { firstName: { default: "test" }, lastName: [String] },
     //   age: { type: Number, unique: true, default: 0 },
-
     //   posts: [PostSchema],
     // });
-
     // await db.createCollection(
     //   { name: "user0", schema: userSchema },
     //   (err, res) => {
@@ -37,18 +34,22 @@ const test = async () => {
     //     console.log(res);
     //   }
     // );
-
     db.collections.user0.insertOne(
-      { posts: [{ content: "this is content" }] },
-      (err: any, res: any) => {
-        console.log(err, res);
+      { posts: [{ content: "content" }] },
+      (err: string, res: any) => {
+        if (err) throw err;
+        console.log(res);
       }
     );
 
-    // const newObject: CollectionDocument = new db.collections.user.document({
-    //   age: 0,
-    // });
+    const newObject: CollectionDocument = new db.collections.user0.document({
+      age: 21,
+    });
 
+    newObject.age = 20;
+    newObject.name = { firstName: "name" };
+
+    newObject._save();
     // db.collections.user.insertMany();
     // db.collections.user.insertOne();
   }
