@@ -22,7 +22,7 @@ export class Collection {
     };
   }
 
-  insertOne(obj: any, cb?: (err: string, res: any) => void) {
+  async insertOne(obj: any, cb?: (err: string | null, res: any) => void) {
     if (typeof obj !== "object" || obj == null)
       return console.error("Please give an objecy you wan't to insert");
 
@@ -37,8 +37,14 @@ export class Collection {
       insertDoc = constructedDoc;
     }
 
-    // console.log(insertDoc);
-    insertData([insertDoc]);
+    const insert = await insertData([insertDoc], this.#obj, this.#options);
+    if (insert.err) {
+      if (cb) cb(insert.err, null);
+      return insert.err;
+    }
+
+    if (cb) cb(null, insert.insertedDocs);
+    return insert.insertedDocs;
   }
 
   insertMany() {

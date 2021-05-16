@@ -33,6 +33,6 @@ export class Document implements CollectionDocument {
     const checkDoc: any = constructDocument(this, this.#obj.schema.properties);
     if (checkDoc.err) return console.error(checkDoc.err);
 
-    insertData([checkDoc]);
+    insertData([checkDoc], this.#obj, this.#options);
   }
 }

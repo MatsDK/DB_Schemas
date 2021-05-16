@@ -3,7 +3,7 @@ import { eventHandler } from "./EventHandler";
 import BSON from "bson";
 import path from "path";
 import fs from "fs";
-import { dataBaseData } from "../types";
+import { collectionObj, dataBaseData } from "../types";
 
 const handleEvents = new eventHandler();
 
@@ -37,13 +37,59 @@ handleEvents.on(
       path.resolve(__dirname, "../data/data"),
       BSON.serialize(dbs)
     );
+    console.log(newCollectionObj);
 
     fs.writeFileSync(
-      path.resolve(__dirname, `../data/${thisDb._id}`),
-      BSON.serialize({ _id: thisDb._id, docs: [] })
+      path.resolve(__dirname, `../data/${newCollectionObj._id}`),
+      BSON.serialize({ _id: newCollectionObj._id, docs: [] })
     );
 
     return { err: false, data: thisDb.Collections };
+  }
+);
+
+handleEvents.on(
+  "insertDocs",
+  async ({
+    db,
+    collection,
+    docs,
+  }: {
+    db: string;
+    collection: string;
+    docs: any[];
+  }) => {
+    try {
+      const dbs: any = BSON.deserialize(
+        fs.readFileSync(path.resolve(__dirname, "../data/data"))
+      );
+      const thisDb: undefined | dataBaseData = dbs.dbs[db.toLowerCase()];
+      if (!thisDb) return { err: `Database '${db}' not found` };
+
+      const thisCollection: undefined | collectionObj = Object.keys(
+        thisDb.Collections
+      )
+        .map((_: string) => thisDb.Collections[_])
+        .find((_) => _._id === collection.trim().toLowerCase());
+      if (!thisCollection) return { err: `Collection not found` };
+
+      const collectionData = BSON.deserialize(
+        fs.readFileSync(
+          path.resolve(__dirname, `../data/${thisCollection._id}`)
+        )
+      );
+
+      collectionData.docs = [...docs, ...collectionData.docs];
+      fs.writeFileSync(
+        path.resolve(__dirname, `../data/${thisCollection._id}`),
+        BSON.serialize(collectionData)
+      );
+
+      return { err: false, insertedDocs: docs };
+    } catch (err) {
+      console.log(err);
+      return { err: "Collection not found" };
+    }
   }
 );
 

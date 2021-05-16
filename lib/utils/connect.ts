@@ -14,7 +14,11 @@ export const connect = async (
   query: queryObj
 ): Promise<any> => {
   try {
-    return new Promise((resolve, reject) => {
+    const timeout = new Promise((resolve, reject) => {
+      setTimeout(resolve, 2000, { err: "Database doesn't respond" });
+    });
+
+    const connect = new Promise((resolve, reject) => {
       const client = net.createConnection(port, host, () => {
         client.write(JSON.stringify(query));
       });
@@ -27,6 +31,8 @@ export const connect = async (
       client.once("close", () => {});
       client.once("error", () => reject);
     });
+
+    return await Promise.race([connect, timeout]);
   } catch (err) {
     return { err: err.message };
   }

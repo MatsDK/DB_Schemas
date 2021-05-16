@@ -1,7 +1,15 @@
 import { PropertyType } from "../types";
+import { forbiddenProps } from "./constants";
 
 export const constructDocument = (doc: any, props: Array<PropertyType>) => {
   const constructedDoc: any = {};
+
+  for (const key of Object.keys(doc)) {
+    if (forbiddenProps.includes(key.toLowerCase()))
+      return {
+        err: `You can't have the property '${key}' declared on your document`,
+      };
+  }
 
   for (let thisProp of props) {
     const key: string = thisProp.name;
