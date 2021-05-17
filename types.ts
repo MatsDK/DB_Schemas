@@ -48,3 +48,12 @@ export interface dataBaseData {
   _id: string;
   Collections: CollectionsManagerObj;
 }
+
+export type getPropValuesReturn = { err: boolean | string };
+
+export interface insertProps {
+  db: string;
+  collection: string;
+  docs: any[];
+  uniqueProps: string[];
+}

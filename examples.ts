@@ -50,15 +50,15 @@ const test = async () => {
     //   }
     // );
     //
-    const newObject: CollectionDocument = new db.collections.user.document({
-      age: 21,
-    });
-    newObject.age = 1;
-    newObject.name = { firstName: undefined };
-    newObject._save((err: any, res: any) => {
-      if (err) return console.error(err);
-      console.log(res);
-    });
+    // const newObject: CollectionDocument = new db.collections.user.document({
+    //   age: 21,
+    // });
+    // newObject.age = 1;
+    // newObject.name = { firstName: "fdjsk" };
+    // newObject._save((err: any, res: any) => {
+    //   if (err) return console.error(err);
+    //   console.log(res);
+    // });
     //
     // db.collections.user.insertMany();
     // db.collections.user.insertOne();
