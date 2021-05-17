@@ -15,13 +15,13 @@ export class eventHandler {
       const queryObj: queryObj = JSON.parse(data),
         thisEvent = this.events.get(queryObj?.eventName?.trim()?.toLowerCase());
 
-      if (!thisEvent) return conn.write({ err: "Query not found" });
+      if (!thisEvent)
+        return conn.write(JSON.stringify({ err: "Query not found" }));
 
       const returnData: Promise<any> = await thisEvent(queryObj.data);
       conn.write(JSON.stringify({ data: returnData }));
     } catch (err) {
-      console.log(err);
-      conn.write({ err: true });
+      conn.write(JSON.stringify({ err: err.message }));
     }
   }
 

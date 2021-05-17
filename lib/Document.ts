@@ -29,10 +29,18 @@ export class Document implements CollectionDocument {
     }
   }
 
-  _save() {
+  async _save(cb?: Function) {
     const checkDoc: any = constructDocument(this, this.#obj.schema.properties);
     if (checkDoc.err) return console.error(checkDoc.err);
 
-    insertData([checkDoc], this.#obj, this.#options);
+    const insert = await insertData([checkDoc], this.#obj, this.#options);
+
+    if (insert.err) {
+      if (cb) cb(insert.err, null);
+      return insert.err;
+    }
+
+    if (cb) cb(null, insert.insertedDocs);
+    return insert.insertedDocs;
   }
 }

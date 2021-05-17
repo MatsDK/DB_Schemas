@@ -20,15 +20,23 @@ const test = async () => {
   if (db instanceof DataBase) {
     // const PostSchema: Schema = new Schema({
     //   content: String,
-    //   comments: [{ text: { type: String, default: "" }, timeStamp: String }],
+    //   comments: [
+    //     {
+    //       text: { type: String, unique: true, default: "" },
+    //       timeStamp: String,
+    //     },
+    //   ],
     // });
     // const userSchema: Schema = new Schema({
-    //   name: { firstName: { default: "test" }, lastName: [String] },
-    //   age: { type: Number, unique: true, default: 0 },
+    //   name: {
+    //     firstName: { default: "test", unique: true },
+    //     lastName: [String],
+    //   },
+    //   age: { type: Number, default: 0 },
     //   posts: [PostSchema],
     // });
     // await db.createCollection(
-    //   { name: "user5", schema: userSchema },
+    //   { name: "user", schema: userSchema },
     //   (err, res) => {
     //     if (err) console.log("Error: " + err);
     //     console.log(res);
@@ -41,12 +49,17 @@ const test = async () => {
     //     console.log(res);
     //   }
     // );
-    // const newObject: CollectionDocument = new db.collections.user0.document({
-    //   age: 21,
-    // });
-    // newObject.age = 20;
-    // newObject.name = { firstName: "name" };
-    // newObject._save();
+    //
+    const newObject: CollectionDocument = new db.collections.user.document({
+      age: 21,
+    });
+    newObject.age = 1;
+    newObject.name = { firstName: undefined };
+    newObject._save((err: any, res: any) => {
+      if (err) return console.error(err);
+      console.log(res);
+    });
+    //
     // db.collections.user.insertMany();
     // db.collections.user.insertOne();
   }
