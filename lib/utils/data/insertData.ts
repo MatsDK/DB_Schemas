@@ -1,10 +1,21 @@
-import {
-  collectionObj,
-  optionsType,
-  PropertyType,
-  SchemaType,
-} from "../../types";
+import { collectionObj, optionsType, PropertyType } from "../../types";
 import { connect } from "../connect";
+
+export const insertHandlers = async (
+  insertDocs: any[],
+  obj: collectionObj,
+  options: optionsType,
+  cb?: Function
+) => {
+  const insert = await insertData(insertDocs, obj, options);
+  if (insert.err) {
+    if (cb) cb(insert.err, null);
+    return insert.err;
+  }
+
+  if (cb) cb(null, insert.insertedDocs);
+  return insert.insertedDocs;
+};
 
 export const insertData = async (
   docs: any[],

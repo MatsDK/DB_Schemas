@@ -3,8 +3,14 @@ import { eventHandler } from "./EventHandler";
 import BSON from "bson";
 import path from "path";
 import fs from "fs";
-import { collectionObj, dataBaseData, insertProps } from "../types";
+import {
+  collectionObj,
+  dataBaseData,
+  findDataProps,
+  insertProps,
+} from "../types";
 import { insertHandler } from "./handlers/insert";
+import { findData } from "./handlers/find";
 
 const handleEvents = new eventHandler();
 
@@ -50,6 +56,10 @@ handleEvents.on(
 
 handleEvents.on("insertDocs", async (props: insertProps) => {
   return insertHandler(props);
+});
+
+handleEvents.on("findData", async (props: findDataProps) => {
+  return findData(props);
 });
 
 const server = net.createServer((conn) => {

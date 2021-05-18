@@ -1,7 +1,10 @@
 import { collectionObj, optionsType, PropertyType, SchemaType } from "./types";
 import { Document } from "./Document";
 import { constructDocument } from "./utils/constructDocument";
-import { insertData } from "./utils/data/insertData";
+import { insertHandlers } from "./utils/data/insertData";
+import { findData } from "./utils/data/queryData";
+
+type cb = (err: string | null, res: any) => void;
 
 export class Collection {
   schema: CollectionSchema;
@@ -22,9 +25,9 @@ export class Collection {
     };
   }
 
-  async insertOne(obj: any, cb?: (err: string | null, res: any) => void) {
+  async insertOne(obj: any, cb?: cb) {
     if (typeof obj !== "object" || obj == null)
-      return console.error("Please give an objecy you wan't to insert");
+      return console.error("Please give an object you wan't to insert");
 
     let insertDoc: any = obj;
     if (this.#obj._strict) {
@@ -32,27 +35,55 @@ export class Collection {
         obj,
         this.#obj.schema.properties
       );
-      if (constructedDoc.err) return console.log(constructedDoc.err);
+      if (constructedDoc.err) {
+        if (cb) cb(constructedDoc.err, null);
+        return constructedDoc.err;
+      }
 
       insertDoc = constructedDoc;
     }
 
-    const insert = await insertData([insertDoc], this.#obj, this.#options);
-    if (insert.err) {
-      if (cb) cb(insert.err, null);
-      return insert.err;
+    return await insertHandlers([insertDoc], this.#obj, this.#options, cb);
+  }
+
+  async insertMany(objs: any[], cb?: cb) {
+    if (!Array.isArray(objs) || objs.length < 1)
+      return console.error(
+        "Please give an array of objects you wan't to insert"
+      );
+
+    const insertDocs: any[] = [];
+    for (const obj of objs) {
+      let insertDoc: any = obj;
+      if (this.#obj._strict) {
+        const constructedDoc = constructDocument(
+          obj,
+          this.#obj.schema.properties
+        );
+        if (constructedDoc.err) {
+          if (cb) cb(constructedDoc.err, null);
+          return constructedDoc.err;
+        }
+
+        insertDoc = constructedDoc;
+      }
+      insertDocs.push(insertDoc);
     }
 
-    if (cb) cb(null, insert.insertedDocs);
-    return insert.insertedDocs;
+    return await insertHandlers(insertDocs, this.#obj, this.#options, cb);
   }
 
-  insertMany() {
-    console.log("insert many documents");
-  }
+  async findMany(searchQuery?: any | cb, cb?: cb) {
+    if (typeof searchQuery === "function" && !cb) cb = searchQuery;
 
-  findMany() {
-    console.log("find many");
+    const foundDocs: any = await findData({}, {}, this.#obj, this.#options);
+    if (foundDocs.err) {
+      if (cb) cb(foundDocs.err, null);
+      return foundDocs.err;
+    }
+
+    if (cb) cb(null, foundDocs.docs);
+    return foundDocs.docs;
   }
 }
 

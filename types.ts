@@ -57,3 +57,10 @@ export interface insertProps {
   docs: any[];
   uniqueProps: string[];
 }
+
+export interface findDataProps {
+  db: string;
+  collection: string;
+  queryOptions: any;
+  query: any;
+}

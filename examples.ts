@@ -18,6 +18,7 @@ const test = async () => {
   });
 
   if (db instanceof DataBase) {
+    const User: any = db.collections.user;
     // const PostSchema: Schema = new Schema({
     //   content: String,
     //   comments: [
@@ -42,8 +43,15 @@ const test = async () => {
     //     console.log(res);
     //   }
     // );
-    // db.collections.user5.insertOne(
-    //   { age: 21, posts: [{ content: "content" }] },
+    //
+    // db.collections.user.insertMany(
+    //   [
+    //     {
+    //       age: 21,
+    //       name: { firstName: "this is name" },
+    //       posts: [{ content: "content" }],
+    //     },
+    //   ],
     //   (err: any, res: any) => {
     //     if (err) throw err;
     //     console.log(res);
@@ -60,7 +68,9 @@ const test = async () => {
     //   console.log(res);
     // });
     //
-    // db.collections.user.insertMany();
+    await User.findMany((err: any, res: any) => {
+      console.log(err, res);
+    });
     // db.collections.user.insertOne();
   }
 };
