@@ -1,7 +1,11 @@
 import { PropertyType } from "../types";
 import { forbiddenProps } from "./constants";
 
-export const constructDocument = (doc: any, props: Array<PropertyType>) => {
+export const constructDocument = (
+  doc: any,
+  props: Array<PropertyType>,
+  complete: boolean
+) => {
   const constructedDoc: any = {};
 
   for (const key of Object.keys(doc)) {
@@ -26,7 +30,8 @@ export const constructDocument = (doc: any, props: Array<PropertyType>) => {
       } else if (thisProp.isObject && !thisProp.isArray) {
         const constrRecursive: any = constructDocument(
           doc[key],
-          thisProp.properties
+          thisProp.properties,
+          complete
         );
 
         if (constrRecursive.err) return constrRecursive;
@@ -45,7 +50,8 @@ export const constructDocument = (doc: any, props: Array<PropertyType>) => {
 
               const checkArrayObj: any = constructDocument(
                 arrayObj,
-                thisProp.properties
+                thisProp.properties,
+                complete
               );
               if (checkArrayObj.err) return checkArrayObj;
 
@@ -62,9 +68,13 @@ export const constructDocument = (doc: any, props: Array<PropertyType>) => {
       }
     } else {
       if (!thisProp.isObject && !thisProp.isArray) {
-        constructedDoc[key] = thisProp.default;
+        if (complete) constructedDoc[key] = thisProp.default;
       } else if (thisProp.isObject && !thisProp.isArray) {
-        const constrRecursive: any = constructDocument({}, thisProp.properties);
+        const constrRecursive: any = constructDocument(
+          {},
+          thisProp.properties,
+          complete
+        );
 
         if (constrRecursive.err) return constrRecursive;
 

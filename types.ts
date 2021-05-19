@@ -64,3 +64,10 @@ export interface findDataProps {
   queryOptions: any;
   query: any;
 }
+
+export interface updateDocsProps {
+  db: string;
+  collection: string;
+  docs: any[];
+  uniqueProps: string[];
+}

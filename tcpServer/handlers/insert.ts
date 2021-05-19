@@ -8,6 +8,7 @@ import {
   insertProps,
 } from "../../types";
 import { checkIfUniqueValue } from "./utils/uniqueValues";
+import { v4 as uuid } from "uuid";
 
 export const insertHandler = ({
   collection,
@@ -38,6 +39,7 @@ export const insertHandler = ({
     collectionData.docs
   );
   if (checkIfDuplicateValues.err) return { err: checkIfDuplicateValues.err };
+  for (const doc of docs) doc._id = uuid();
 
   collectionData.docs = [...docs, ...collectionData.docs];
   fs.writeFileSync(

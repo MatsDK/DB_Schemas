@@ -57,3 +57,13 @@ export interface CollectionDocument {
   _save: Function;
   [key: string]: any;
 }
+
+export interface searchQuery {
+  orderBy: any;
+  limit: number;
+  skip: number;
+  where: {
+    $or: any;
+    [key: string]: any;
+  };
+}

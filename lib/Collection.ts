@@ -20,7 +20,7 @@ export class Collection {
     this.#obj = obj;
     this.document = class constructObj {
       constructor(dataObj: any) {
-        return new Document(dataObj, obj, options);
+        return new Document(dataObj, obj, options, true);
       }
     };
   }
@@ -33,7 +33,8 @@ export class Collection {
     if (this.#obj._strict) {
       const constructedDoc = constructDocument(
         obj,
-        this.#obj.schema.properties
+        this.#obj.schema.properties,
+        true
       );
       if (constructedDoc.err) {
         if (cb) cb(constructedDoc.err, null);
@@ -58,7 +59,8 @@ export class Collection {
       if (this.#obj._strict) {
         const constructedDoc = constructDocument(
           obj,
-          this.#obj.schema.properties
+          this.#obj.schema.properties,
+          true
         );
         if (constructedDoc.err) {
           if (cb) cb(constructedDoc.err, null);

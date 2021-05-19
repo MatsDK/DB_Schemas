@@ -8,9 +8,11 @@ import {
   dataBaseData,
   findDataProps,
   insertProps,
+  updateDocsProps,
 } from "../types";
 import { insertHandler } from "./handlers/insert";
 import { findData } from "./handlers/find";
+import { checkIfUniqueValue } from "./handlers/utils/uniqueValues";
 
 const handleEvents = new eventHandler();
 
@@ -61,6 +63,52 @@ handleEvents.on("insertDocs", async (props: insertProps) => {
 handleEvents.on("findData", async (props: findDataProps) => {
   return findData(props);
 });
+
+handleEvents.on(
+  "updateDocs",
+  async ({ db, collection, docs, uniqueProps }: updateDocsProps) => {
+    try {
+      const dbs: any = BSON.deserialize(
+        fs.readFileSync(path.resolve(__dirname, "../data/data"))
+      );
+      const thisDb: undefined | dataBaseData = dbs.dbs[db.toLowerCase()];
+      if (!thisDb) return { err: `Database '${db}' not found` };
+
+      const thisCollection: undefined | collectionObj =
+        thisDb.Collections[collection.trim().toLowerCase()];
+      if (!thisCollection)
+        return { err: `Collection '${collection} not found'` };
+
+      const thisCollectionData = BSON.deserialize(
+        fs.readFileSync(
+          path.resolve(__dirname, `../data/${thisCollection._id}`)
+        )
+      );
+
+      for (let doc of docs) {
+        const idx = thisCollectionData.docs.findIndex(
+          (_: any) => doc._id && _._id === doc._id
+        );
+        if (idx < 0) return { err: "Document not found" };
+
+        const currArr = thisCollectionData.docs;
+        currArr.splice(idx, 1);
+
+        const checkUniqueValues: any = checkIfUniqueValue(
+          uniqueProps,
+          [doc],
+          currArr
+        );
+        if (checkUniqueValues.err) return { err: checkUniqueValues.err };
+      }
+
+      return { err: false };
+    } catch (err) {
+      console.log(err);
+      return { err: err.message };
+    }
+  }
+);
 
 const server = net.createServer((conn) => {
   conn.on("data", (data) => {

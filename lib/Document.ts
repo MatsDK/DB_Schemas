@@ -1,15 +1,24 @@
 import { collectionObj, CollectionDocument, optionsType } from "./types";
 import { constructDocument } from "./utils/constructDocument";
-import { insertData } from "./utils/data/insertData";
+import { insertData, getUniquePropsRecursive } from "./utils/data/insertData";
+import { updateDocs } from "./utils/data/updateDocs";
 
 export class Document implements CollectionDocument {
   #options: optionsType;
   #obj: collectionObj;
+  #isNewDoc: boolean;
   [string: string]: any;
+  _id?: string;
 
-  constructor(obj: any, dbObj: collectionObj, options: optionsType) {
+  constructor(
+    obj: any,
+    dbObj: collectionObj,
+    options: optionsType,
+    properties: any
+  ) {
     this.#obj = dbObj;
     this.#options = options;
+    this.#isNewDoc = properties.complete;
 
     Object.defineProperty(this, "_save", {
       enumerable: false,
@@ -18,7 +27,8 @@ export class Document implements CollectionDocument {
 
     const constructedDoc: any = constructDocument(
       obj,
-      this.#obj.schema.properties
+      this.#obj.schema.properties,
+      properties.complete
     );
 
     if (constructedDoc.err) console.error(constructedDoc.err);
@@ -30,17 +40,47 @@ export class Document implements CollectionDocument {
   }
 
   async _save(cb?: Function) {
-    const checkDoc: any = constructDocument(this, this.#obj.schema.properties);
-    if (checkDoc.err) return console.error(checkDoc.err);
+    if (this.#isNewDoc) {
+      const checkDoc: any = constructDocument(
+        this,
+        this.#obj.schema.properties,
+        true
+      );
 
-    const insert = await insertData([checkDoc], this.#obj, this.#options);
+      if (checkDoc.err) return console.error(checkDoc.err);
 
-    if (insert.err) {
-      if (cb) cb(insert.err, null);
-      return insert.err;
+      const insert = await insertData([checkDoc], this.#obj, this.#options);
+
+      if (insert.err) {
+        if (cb) cb(insert.err, null);
+        return insert.err;
+      }
+
+      if (cb) cb(null, insert.insertedDocs);
+      return insert.insertedDocs;
+    } else {
+      const thisDocId = this._id,
+        thisDoc = { ...this };
+      delete thisDoc._id;
+
+      const thisConstructedDoc = constructDocument(
+        thisDoc,
+        this.#obj.schema.properties,
+        this.#isNewDoc
+      );
+      thisConstructedDoc._id = thisDocId;
+
+      const uniqueProps: string[] = getUniquePropsRecursive(
+        this.#obj.schema.properties
+      );
+
+      const update = await updateDocs(
+        [thisConstructedDoc],
+        this.#obj,
+        this.#options,
+        uniqueProps
+      );
+      console.log(update);
     }
-
-    if (cb) cb(null, insert.insertedDocs);
-    return insert.insertedDocs;
   }
 }

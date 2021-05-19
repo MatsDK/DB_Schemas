@@ -5,6 +5,7 @@ export const checkIfUniqueValue = (
   newDocs: any[],
   docs: any[]
 ) => {
+  // console.log(newDocs, docs);
   for (const prop of uniqueProps) {
     const checkProp: getPropValuesReturn = getPropertyValues(
       [...newDocs, ...docs],

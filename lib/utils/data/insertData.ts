@@ -36,7 +36,7 @@ export const insertData = async (
   return { insertedDocs: data.insertedDocs };
 };
 
-const getUniquePropsRecursive = (
+export const getUniquePropsRecursive = (
   schemaProperties: PropertyType[],
   currObjPath: string = ""
 ): string[] => {

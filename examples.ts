@@ -62,14 +62,16 @@ const test = async () => {
     //   age: 21,
     // });
     // newObject.age = 1;
-    // newObject.name = { firstName: "fdjsk" };
+    // newObject.name = { firstName: "21" };
     // newObject._save((err: any, res: any) => {
     //   if (err) return console.error(err);
     //   console.log(res);
     // });
     //
     await User.findMany((err: any, res: any) => {
-      console.log(err, res);
+      res[0].age = 21;
+      res[0].name.firstName = "new name";
+      res[0]._save();
     });
     // db.collections.user.insertOne();
   }
