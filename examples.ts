@@ -75,19 +75,28 @@ const test = async () => {
         limit: 10,
         skip: 0,
         where: {
-          $or: [{ age: { $equals: 20 } }, { age: 21 }],
-          // $and: [{ $or: [{ test: "test" }] }],
-          age: 21,
-          name: { firstName: { $equals: "test" } },
+          // $or: [{ age: { $equals: 20 } }, { age: 21 }],
+          $and: [
+            { $or: [{ age: 21 }, { age: { $equals: 20 } }] },
+            {
+              $or: [
+                { name: { firstName: { $equals: "test" } } },
+                { name: { firstName: "name" } },
+              ],
+            },
+          ],
+
+          // name: { firstName: { $equals: "test" } },
+          age: { $equals: 22 },
         },
       },
       (err: any, res: any) => {
-        res[0].age = 22;
-
-        res[0]._save((err: any, res: any) => {
-          if (err) return console.error(err);
-          console.log(res);
-        });
+        console.log(res);
+        // res[0].age = 22;
+        // res[0]._save((err: any, res: any) => {
+        //   if (err) return console.error(err);
+        //   // console.log(res);
+        // });
       }
     );
   }

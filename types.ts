@@ -61,7 +61,6 @@ export interface insertProps {
 export interface findDataProps {
   db: string;
   collection: string;
-  queryOptions: any;
   query: any;
 }
 
@@ -70,4 +69,10 @@ export interface updateDocsProps {
   collection: string;
   docs: any[];
   uniqueProps: string[];
+}
+export interface queryOptionsObj {
+  $equals: any;
+  $gt: any;
+  $lt: any;
+  $in: any;
 }

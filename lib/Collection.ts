@@ -84,10 +84,15 @@ export class Collection {
   async findMany(searchQuery: searchQuery, cb?: cb) {
     if (typeof searchQuery === "function" && !cb) cb = searchQuery;
     if (typeof searchQuery === "object" && searchQuery != null) {
-      parseSearchQuery(searchQuery);
+      const createSearchQuery: any = parseSearchQuery(searchQuery);
+      if (createSearchQuery.err) return console.error(createSearchQuery.err);
     }
 
-    const foundDocs: any = await findData({}, {}, this.#obj, this.#options);
+    const foundDocs: any = await findData(
+      searchQuery,
+      this.#obj,
+      this.#options
+    );
     if (foundDocs.err) {
       if (cb) cb(foundDocs.err, null);
       return foundDocs.err;

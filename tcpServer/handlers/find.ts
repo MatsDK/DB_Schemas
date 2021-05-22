@@ -2,8 +2,9 @@ import fs from "fs";
 import path from "path";
 import BSON from "bson";
 import { collectionObj, dataBaseData, findDataProps } from "../../types";
+import { filterData } from "./helpers/filterData";
 
-export const findData = async ({ db, collection }: findDataProps) => {
+export const findData = async ({ db, collection, query }: findDataProps) => {
   try {
     const dbs: any = BSON.deserialize(
       fs.readFileSync(path.resolve(__dirname, "../../data/data"))
@@ -21,7 +22,15 @@ export const findData = async ({ db, collection }: findDataProps) => {
       )
     );
 
-    return { err: false, docs: thisCollectionData.docs };
+    const { ids }: { ids: Set<number> } = filterData(
+        thisCollectionData.docs,
+        query.where
+      ),
+      validDocs = Array.from(ids).map(
+        (_: number) => thisCollectionData.docs[_]
+      );
+
+    return { err: false, docs: validDocs };
   } catch (err) {
     console.log(err);
     return { err: err.message };

@@ -7,7 +7,7 @@ import {
   getPropValuesReturn,
   insertProps,
 } from "../../types";
-import { checkIfUniqueValue } from "./utils/uniqueValues";
+import { checkIfUniqueValue } from "./helpers/uniqueValues";
 import { v4 as uuid } from "uuid";
 
 export const insertHandler = ({

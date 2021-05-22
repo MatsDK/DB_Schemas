@@ -17,7 +17,6 @@ export const getDataBase = async (
 
 export const findData = async (
   query: any,
-  quertyOptions: any,
   obj: collectionObj,
   options: optionsType
 ): Promise<{ err: string } | Array<any>> => {
@@ -29,7 +28,6 @@ export const findData = async (
         collection: obj._name,
         db: options.database,
         query,
-        quertyOptions,
       },
     }
   );

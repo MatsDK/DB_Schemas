@@ -12,7 +12,7 @@ import {
 } from "../types";
 import { insertHandler } from "./handlers/insert";
 import { findData } from "./handlers/find";
-import { checkIfUniqueValue } from "./handlers/utils/uniqueValues";
+import { checkIfUniqueValue } from "./handlers/helpers/uniqueValues";
 
 const handleEvents = new eventHandler();
 

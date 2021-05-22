@@ -3,6 +3,7 @@ import {
   checkORObjReturn,
   checkSearchPropertiesReturn,
   searchQuery,
+  checkANDObjReturn,
 } from "../types";
 
 const defaultSearchQuery: searchQuery = {
@@ -29,8 +30,8 @@ export const parseSearchQuery = (searchQuery: searchQuery) => {
     checkSearchProperties(searchQuery.where);
   if (constructedSearyQuery.err) returnQuery.where = constructedSearyQuery;
 
-  console.log(constructedSearyQuery.searchQuery.$or);
   returnQuery.where = constructedSearyQuery.searchQuery;
+  return returnQuery;
 };
 
 const queryTypes: string[] = ["$or", "$and"];
@@ -47,7 +48,8 @@ const checkSearchProperties = (
   }
 
   if ("$and" in searchQuery) {
-    console.log("and statement");
+    const checkAND: checkANDObjReturn = checkANDObj(searchQuery);
+    if (checkAND?.err) return { err: checkAND.err as string };
   }
 
   const queryKeys: string[] = Object.keys(searchQuery).filter(
@@ -55,9 +57,9 @@ const checkSearchProperties = (
   );
 
   for (const key of queryKeys) {
-    if (typeof searchQuery[key] !== "object")
+    if (typeof searchQuery[key] !== "object") {
       searchQuery[key] = { $equals: searchQuery[key] };
-    else if (
+    } else if (
       !isSearchOptionsObj(searchQuery[key]) &&
       typeof searchQuery[key] === "object" &&
       searchQuery[key] != null
@@ -73,9 +75,24 @@ const checkSearchProperties = (
   return { searchQuery };
 };
 
+const checkANDObj = (searchQuery: any): checkANDObjReturn => {
+  const thisValue = searchQuery["$and"];
+  if (!Array.isArray(thisValue) || thisValue.length < 2)
+    return {
+      err: "'$and' in seary query should be an array of atleast 2 items",
+    };
+
+  for (const ORObj of thisValue) {
+    const checkOR: checkORObjReturn = checkORObj(ORObj);
+    if (checkOR.err) return { err: checkOR.err };
+  }
+
+  return { err: false };
+};
+
 const checkORObj = (searchQuery: any): checkORObjReturn => {
   const thisValue = searchQuery["$or"];
-  if (!Array.isArray(thisValue) || thisValue.length > 2)
+  if (!Array.isArray(thisValue) || thisValue.length < 2)
     return {
       err: "'$or' in search query should be an array of atleast 2 items",
     };
@@ -115,7 +132,8 @@ const checkIfOrderCorrect = (order: any): checkOrderReturn => {
         order[Object.keys(order)[0]] = thisObjValue;
         return { newOrder: order };
       } else if (typeof thisObjValue === "object" && thisObjValue != null) {
-        const checkRecursive: any = checkIfOrderCorrect(thisObjValue);
+        const checkRecursive: checkOrderReturn =
+          checkIfOrderCorrect(thisObjValue);
         if (checkRecursive.err) return { err: checkRecursive.err };
 
         thisObjValue = checkRecursive.newOrder;
