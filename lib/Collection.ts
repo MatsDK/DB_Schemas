@@ -1,4 +1,5 @@
 import {
+  cb,
   collectionObj,
   optionsType,
   PropertyType,
@@ -10,8 +11,6 @@ import { constructDocument } from "./utils/constructDocument";
 import { insertHandlers } from "./utils/data/insertData";
 import { findData } from "./utils/data/queryData";
 import { parseSearchQuery } from "./utils/searchQuery";
-
-type cb = (err: string | null, res: any) => void;
 
 export class Collection {
   schema: CollectionSchema;

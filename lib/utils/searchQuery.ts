@@ -1,4 +1,9 @@
-import { searchQuery } from "../types";
+import {
+  checkOrderReturn,
+  checkORObjReturn,
+  checkSearchPropertiesReturn,
+  searchQuery,
+} from "../types";
 
 const defaultSearchQuery: searchQuery = {
   limit: undefined,
@@ -15,22 +20,31 @@ export const parseSearchQuery = (searchQuery: searchQuery) => {
 
   if (typeof searchQuery.skip === "number") returnQuery.skip = searchQuery.skip;
 
-  const checkOrder: any = checkIfOrderCorrect(searchQuery.orderBy);
+  const checkOrder: checkOrderReturn = checkIfOrderCorrect(searchQuery.orderBy);
   if (checkOrder.err) return { err: checkOrder.err };
 
   returnQuery.orderBy = checkOrder.newOrder;
 
-  checkSearchProperties(searchQuery.where);
-  console.log(returnQuery);
+  const constructedSearyQuery: checkSearchPropertiesReturn =
+    checkSearchProperties(searchQuery.where);
+  if (constructedSearyQuery.err) returnQuery.where = constructedSearyQuery;
+
+  console.log(constructedSearyQuery.searchQuery.$or);
+  returnQuery.where = constructedSearyQuery.searchQuery;
 };
 
 const queryTypes: string[] = ["$or", "$and"];
 
-const checkSearchProperties = (searchQuery: any) => {
-  if (typeof searchQuery === "object" && searchQuery != null)
-    if ("$or" in searchQuery) {
-      console.log("or statement");
-    }
+const checkSearchProperties = (
+  searchQuery: any
+): checkSearchPropertiesReturn => {
+  if (typeof searchQuery !== "object" || searchQuery == null)
+    return { searchQuery };
+
+  if ("$or" in searchQuery) {
+    const checkOR: checkORObjReturn = checkORObj(searchQuery);
+    if (checkOR.err) return { err: checkOR.err as string };
+  }
 
   if ("$and" in searchQuery) {
     console.log("and statement");
@@ -41,13 +55,51 @@ const checkSearchProperties = (searchQuery: any) => {
   );
 
   for (const key of queryKeys) {
-    console.log(key, searchQuery[key]);
+    if (typeof searchQuery[key] !== "object")
+      searchQuery[key] = { $equals: searchQuery[key] };
+    else if (
+      !isSearchOptionsObj(searchQuery[key]) &&
+      typeof searchQuery[key] === "object" &&
+      searchQuery[key] != null
+    ) {
+      const checkProperties: checkSearchPropertiesReturn =
+        checkSearchProperties(searchQuery[key]);
+      if (checkProperties.err) return { err: checkProperties.err };
+
+      searchQuery[key] = checkProperties.searchQuery;
+    }
   }
+
+  return { searchQuery };
 };
 
-const checkIfOrderCorrect = (
-  order: any
-): { err: string } | { newOrder: any } => {
+const checkORObj = (searchQuery: any): checkORObjReturn => {
+  const thisValue = searchQuery["$or"];
+  if (!Array.isArray(thisValue) || thisValue.length > 2)
+    return {
+      err: "'$or' in search query should be an array of atleast 2 items",
+    };
+
+  for (let [idx, _] of thisValue.entries()) {
+    const constructedSearyQuery: checkSearchPropertiesReturn =
+      checkSearchProperties({ ..._ });
+    if (constructedSearyQuery.err) return { err: constructedSearyQuery.err };
+
+    thisValue[idx] = constructedSearyQuery.searchQuery;
+  }
+
+  return { err: false };
+};
+
+const searchOptions: string[] = ["$equals", "$in", "$gt", "$lt"];
+
+const isSearchOptionsObj = (obj: any): boolean => {
+  if (typeof obj !== "object" || !obj) return false;
+
+  return Object.keys(obj).every((_: string) => searchOptions.includes(_));
+};
+
+const checkIfOrderCorrect = (order: any): checkOrderReturn => {
   if (!order) return { newOrder: undefined };
 
   if (typeof order === "object") {

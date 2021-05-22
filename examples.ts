@@ -75,8 +75,9 @@ const test = async () => {
         limit: 10,
         skip: 0,
         where: {
-          $or: [{ age: { $equals: 20 } }, { age: { $equals: 21 } }],
+          $or: [{ age: { $equals: 20 } }, { age: 21 }],
           // $and: [{ $or: [{ test: "test" }] }],
+          age: 21,
           name: { firstName: { $equals: "test" } },
         },
       },
