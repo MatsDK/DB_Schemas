@@ -85,24 +85,34 @@ handleEvents.on(
         )
       );
 
+      const newDocs = [...thisCollectionData.docs];
       for (let doc of docs) {
-        const idx = thisCollectionData.docs.findIndex(
+        const idx: number = thisCollectionData.docs.findIndex(
           (_: any) => doc._id && _._id === doc._id
         );
         if (idx < 0) return { err: "Document not found" };
 
-        const currArr = thisCollectionData.docs;
+        const currArr: any[] = thisCollectionData.docs;
         currArr.splice(idx, 1);
 
-        const checkUniqueValues: any = checkIfUniqueValue(
+        const checkUniqueValues: { err: boolean | string } = checkIfUniqueValue(
           uniqueProps,
           [doc],
           currArr
         );
-        if (checkUniqueValues.err) return { err: checkUniqueValues.err };
-      }
 
-      return { err: false };
+        if (checkUniqueValues.err) return { err: checkUniqueValues.err };
+
+        newDocs[idx] = doc;
+      }
+      thisCollectionData.docs = newDocs;
+
+      fs.writeFileSync(
+        path.resolve(__dirname, `../data/${thisCollection._id}`),
+        BSON.serialize(thisCollectionData)
+      );
+
+      return { err: false, updatedDocs: docs };
     } catch (err) {
       console.log(err);
       return { err: err.message };

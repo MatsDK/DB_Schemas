@@ -1,6 +1,7 @@
 import { Client } from "./lib/Client";
 import { DataBase } from "./lib/DataBase";
 import { Schema } from "./lib/Schema";
+import { Collection } from "./lib/Collection";
 import { CollectionDocument } from "./lib/types";
 
 const dbClient = new Client({
@@ -18,7 +19,7 @@ const test = async () => {
   });
 
   if (db instanceof DataBase) {
-    const User: any = db.collections.user;
+    const User: Collection = db.collections.user;
     // const PostSchema: Schema = new Schema({
     //   content: String,
     //   comments: [
@@ -68,12 +69,26 @@ const test = async () => {
     //   console.log(res);
     // });
     //
-    await User.findMany((err: any, res: any) => {
-      res[0].age = 21;
-      res[0].name.firstName = "new name";
-      res[0]._save();
-    });
-    // db.collections.user.insertOne();
+    await User.findMany(
+      {
+        orderBy: { age: "Desc" },
+        limit: 10,
+        skip: 0,
+        where: {
+          $or: [{ age: { $equals: 20 } }, { age: { $equals: 21 } }],
+          // $and: [{ $or: [{ test: "test" }] }],
+          name: { firstName: { $equals: "test" } },
+        },
+      },
+      (err: any, res: any) => {
+        res[0].age = 22;
+
+        res[0]._save((err: any, res: any) => {
+          if (err) return console.error(err);
+          console.log(res);
+        });
+      }
+    );
   }
 };
 

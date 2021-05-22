@@ -80,7 +80,14 @@ export class Document implements CollectionDocument {
         this.#options,
         uniqueProps
       );
-      console.log(update);
+
+      if (update.err) {
+        if (cb) cb(update.err, null);
+        return update.err;
+      }
+
+      if (cb) cb(null, update.updatedDocs[0]);
+      return update.updatedDocs[0];
     }
   }
 }

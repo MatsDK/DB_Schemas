@@ -59,11 +59,12 @@ export interface CollectionDocument {
 }
 
 export interface searchQuery {
-  orderBy: any;
-  limit: number;
-  skip: number;
-  where: {
-    $or: any;
+  orderBy?: any;
+  limit?: number;
+  skip?: number;
+  where?: {
+    $or?: any[];
+    $and?: Array<{ $or: any[] }>;
     [key: string]: any;
   };
 }

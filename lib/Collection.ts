@@ -1,8 +1,15 @@
-import { collectionObj, optionsType, PropertyType, SchemaType } from "./types";
+import {
+  collectionObj,
+  optionsType,
+  PropertyType,
+  SchemaType,
+  searchQuery,
+} from "./types";
 import { Document } from "./Document";
 import { constructDocument } from "./utils/constructDocument";
 import { insertHandlers } from "./utils/data/insertData";
 import { findData } from "./utils/data/queryData";
+import { parseSearchQuery } from "./utils/searchQuery";
 
 type cb = (err: string | null, res: any) => void;
 
@@ -75,8 +82,11 @@ export class Collection {
     return await insertHandlers(insertDocs, this.#obj, this.#options, cb);
   }
 
-  async findMany(searchQuery?: any | cb, cb?: cb) {
+  async findMany(searchQuery: searchQuery, cb?: cb) {
     if (typeof searchQuery === "function" && !cb) cb = searchQuery;
+    if (typeof searchQuery === "object" && searchQuery != null) {
+      parseSearchQuery(searchQuery);
+    }
 
     const foundDocs: any = await findData({}, {}, this.#obj, this.#options);
     if (foundDocs.err) {
