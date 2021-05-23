@@ -16,10 +16,11 @@ const defaultSearchQuery: searchQuery = {
 export const parseSearchQuery = (searchQuery: searchQuery) => {
   const returnQuery: searchQuery = { ...defaultSearchQuery };
 
-  if (typeof searchQuery.limit === "number")
+  if (typeof searchQuery.limit === "number" && searchQuery.limit >= 0)
     returnQuery.limit = searchQuery.limit;
 
-  if (typeof searchQuery.skip === "number") returnQuery.skip = searchQuery.skip;
+  if (typeof searchQuery.skip === "number" && searchQuery.skip >= 0)
+    returnQuery.skip = searchQuery.skip;
 
   const checkOrder: checkOrderReturn = checkIfOrderCorrect(searchQuery.orderBy);
   if (checkOrder.err) return { err: checkOrder.err };
@@ -47,10 +48,10 @@ const checkSearchProperties = (
     if (checkOR.err) return { err: checkOR.err as string };
   }
 
-  if ("$and" in searchQuery) {
-    const checkAND: checkANDObjReturn = checkANDObj(searchQuery);
-    if (checkAND?.err) return { err: checkAND.err as string };
-  }
+  // if ("$and" in searchQuery) {
+  //   const checkAND: checkANDObjReturn = checkANDObj(searchQuery);
+  //   if (checkAND?.err) return { err: checkAND.err as string };
+  // }
 
   const queryKeys: string[] = Object.keys(searchQuery).filter(
     (_: string) => !queryTypes.includes(_)
@@ -59,36 +60,46 @@ const checkSearchProperties = (
   for (const key of queryKeys) {
     if (typeof searchQuery[key] !== "object") {
       searchQuery[key] = { $equals: searchQuery[key] };
-    } else if (
-      !isSearchOptionsObj(searchQuery[key]) &&
-      typeof searchQuery[key] === "object" &&
-      searchQuery[key] != null
-    ) {
+    } else if (isNestedObj(searchQuery[key])) {
       const checkProperties: checkSearchPropertiesReturn =
         checkSearchProperties(searchQuery[key]);
       if (checkProperties.err) return { err: checkProperties.err };
 
       searchQuery[key] = checkProperties.searchQuery;
+    } else if (isINstatement(searchQuery[key])) {
+      if (typeof searchQuery[key]["$in"] === "object") {
+        const checkINstatement: checkSearchPropertiesReturn =
+          checkSearchProperties(searchQuery[key]["$in"]);
+        if (checkINstatement.err) return { err: checkINstatement.err };
+
+        searchQuery[key]["$in"] = checkINstatement.searchQuery;
+      } else searchQuery[key]["$in"] = { $equals: searchQuery[key]["$in"] };
     }
   }
 
   return { searchQuery };
 };
 
-const checkANDObj = (searchQuery: any): checkANDObjReturn => {
-  const thisValue = searchQuery["$and"];
-  if (!Array.isArray(thisValue) || thisValue.length < 2)
-    return {
-      err: "'$and' in seary query should be an array of atleast 2 items",
-    };
+const isNestedObj = (obj: any): boolean =>
+  !isSearchOptionsObj(obj) && typeof obj === "object" && obj != null;
 
-  for (const ORObj of thisValue) {
-    const checkOR: checkORObjReturn = checkORObj(ORObj);
-    if (checkOR.err) return { err: checkOR.err };
-  }
+const isINstatement = (obj: any): boolean =>
+  isSearchOptionsObj(obj) && "$in" in obj;
 
-  return { err: false };
-};
+// const checkANDObj = (searchQuery: any): checkANDObjReturn => {
+//   const thisValue = searchQuery["$and"];
+//   if (!Array.isArray(thisValue) || thisValue.length < 2)
+//     return {
+//       err: "'$and' in seary query should be an array of atleast 2 items",
+//     };
+
+//   for (const ORObj of thisValue) {
+//     const checkOR: checkORObjReturn = checkORObj(ORObj);
+//     if (checkOR.err) return { err: checkOR.err };
+//   }
+
+//   return { err: false };
+// };
 
 const checkORObj = (searchQuery: any): checkORObjReturn => {
   const thisValue = searchQuery["$or"];

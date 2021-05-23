@@ -48,8 +48,11 @@ const test = async () => {
     // db.collections.user.insertMany(
     //   [
     //     {
-    //       age: 21,
-    //       name: { firstName: "this is name" },
+    //       age: 22,
+    //       name: {
+    //         firstName: "name21",
+    //         lastName: ["name1", "name2", "name3"],
+    //       },
     //       posts: [{ content: "content" }],
     //     },
     //   ],
@@ -72,22 +75,20 @@ const test = async () => {
     await User.findMany(
       {
         orderBy: { age: "Desc" },
-        limit: 10,
+        limit: 100,
         skip: 0,
         where: {
-          // $or: [{ age: { $equals: 20 } }, { age: 21 }],
-          $and: [
-            { $or: [{ age: 21 }, { age: { $equals: 20 } }] },
-            {
-              $or: [
-                { name: { firstName: { $equals: "test" } } },
-                { name: { firstName: "name" } },
-              ],
-            },
-          ],
-
-          // name: { firstName: { $equals: "test" } },
-          age: { $equals: 22 },
+          // $or: [
+          //   { name: { firstName: { $equals: "new name" } }, age: 22 },
+          //   { name: { firstName: "test" } },
+          // ],
+          name: {
+            lastName: { $in: "name2" },
+          },
+          // _id: "78337dae-83d7-420e-b1cc-ac5d0e97d77f",
+          posts: { $in: { content: { $equals: "content" } } },
+          // age: { $gt: 0, $lt: 22 },
+          // _id: "bd55048a-e35c-4fdb-8b79-57f81e7ef62f",
         },
       },
       (err: any, res: any) => {
@@ -95,7 +96,7 @@ const test = async () => {
         // res[0].age = 22;
         // res[0]._save((err: any, res: any) => {
         //   if (err) return console.error(err);
-        //   // console.log(res);
+        //   console.log(res);
         // });
       }
     );

@@ -22,13 +22,14 @@ export const findData = async ({ db, collection, query }: findDataProps) => {
       )
     );
 
-    const { ids }: { ids: Set<number> } = filterData(
-        thisCollectionData.docs,
-        query.where
-      ),
-      validDocs = Array.from(ids).map(
-        (_: number) => thisCollectionData.docs[_]
-      );
+    const idxs: number[] = Array.from(
+      filterData(thisCollectionData.docs, query.where).idxs
+    );
+    idxs.splice(0, query.skip);
+    if (query.limit != null) idxs.length = query.limit;
+    const validDocs = idxs
+      .filter((_: number | undefined) => _ != null)
+      .map((_: number) => thisCollectionData.docs[_]);
 
     return { err: false, docs: validDocs };
   } catch (err) {

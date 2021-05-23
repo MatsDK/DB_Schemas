@@ -25,19 +25,34 @@ export const filterData = (data: any[], query: any) => {
       const recursiveValidIdxs = filterData(
         data.map((_: any) => _[key]),
         thisValue
-      ).ids;
+      ).idxs;
 
-      const newSet: Set<number> = new Set();
-      Array.from(recursiveValidIdxs).forEach((_: number) => {
-        if (validDocsIdxs.has(_)) newSet.add(_);
-      });
-
-      validDocsIdxs = newSet;
+      validDocsIdxs = getCommonIdxsFromSets(recursiveValidIdxs, validDocsIdxs);
     }
   }
 
-  return { ids: validDocsIdxs };
+  if ("$or" in query) {
+    const ORstatemenValidIdxs: Set<number> = new Set();
+    for (const ORStatement of query["$or"])
+      Array.from(filterData(data, ORStatement).idxs).forEach((_: number) =>
+        ORstatemenValidIdxs.add(_)
+      );
+
+    validDocsIdxs = getCommonIdxsFromSets(ORstatemenValidIdxs, validDocsIdxs);
+  }
+
+  return { idxs: validDocsIdxs };
 };
+
+const getCommonIdxsFromSets = (
+  set1: Set<number>,
+  set2: Set<number>
+): Set<number> =>
+  new Set(
+    Array.from(set1)
+      .map((_: number) => (set2.has(_) ? _ : undefined))
+      .filter((_: any) => _ != null)
+  ) as Set<number>;
 
 const isValidDoc = (
   queryOptionsObj: queryOptionsObj,
@@ -46,6 +61,47 @@ const isValidDoc = (
 ): boolean => {
   if ("$equals" in queryOptionsObj && doc[key] != queryOptionsObj.$equals)
     return false;
+
+  if ("$gt" in queryOptionsObj && doc[key] <= queryOptionsObj.$gt) return false;
+
+  if ("$lt" in queryOptionsObj && doc[key] >= queryOptionsObj.$lt) return false;
+
+  if ("$in" in queryOptionsObj) {
+    if (!checkINstatement(doc[key], queryOptionsObj)) return false;
+  }
+
+  return true;
+};
+
+const checkINstatement = (
+  doc: any,
+  queryOptionsObj: queryOptionsObj
+): boolean => {
+  if (!Array.isArray(doc)) return false;
+
+  if (Array.isArray(queryOptionsObj.$in)) {
+    for (const idx in queryOptionsObj.$in)
+      if (
+        !filterData(
+          doc.map((_: any) => ({ data: _ })),
+          { data: queryOptionsObj.$in[idx] }
+        ).idxs.size
+      )
+        return false;
+  } else {
+    if (!isSearchOptionsObj(queryOptionsObj.$in)) {
+      if (!filterData(doc, queryOptionsObj.$in).idxs.size) return false;
+    } else {
+      if (
+        !filterData(
+          doc.map((_: any) => ({ data: _ })),
+          { data: queryOptionsObj.$in }
+        ).idxs.size
+      ) {
+        return false;
+      }
+    }
+  }
 
   return true;
 };
