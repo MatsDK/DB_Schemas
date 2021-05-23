@@ -27,13 +27,39 @@ export const findData = async ({ db, collection, query }: findDataProps) => {
     );
     idxs.splice(0, query.skip);
     if (query.limit != null) idxs.length = query.limit;
-    const validDocs = idxs
+    let validDocs = idxs
       .filter((_: number | undefined) => _ != null)
       .map((_: number) => thisCollectionData.docs[_]);
 
+    validDocs = orderData(query.orderBy, validDocs);
     return { err: false, docs: validDocs };
   } catch (err) {
     console.log(err);
     return { err: err.message };
   }
+};
+
+type orderReturn = "asc" | "desc";
+const orderData = (orderQuery: any, docs: any[]): any[] => {
+  const getOrder = (orderQuery: any): orderReturn => {
+    const thisValue = orderQuery[Object.keys(orderQuery)[0]];
+    if (typeof thisValue === "object" && thisValue != null)
+      return getOrder(thisValue);
+
+    return thisValue;
+  };
+
+  const getValue = (obj: any, query: any): string => {
+    const thisValue = obj[Object.keys(query)[0]];
+    if (typeof thisValue === "object" && thisValue != null)
+      return getValue(thisValue, query[Object.keys(query)[0]]);
+
+    return thisValue;
+  };
+
+  const order: orderReturn = getOrder(orderQuery);
+  return docs.sort((a: any, b: any) => {
+    [a, b] = [getValue(a, orderQuery), getValue(b, orderQuery)];
+    return order == "asc" ? a - b : b - a;
+  });
 };

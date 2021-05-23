@@ -73,4 +73,5 @@ export type checkOrderReturn = { err?: string; newOrder?: any };
 export type checkSearchPropertiesReturn = { err?: string; searchQuery?: any };
 export type checkORObjReturn = { err: string | boolean };
 export type checkANDObjReturn = { err: string | boolean };
+export type checkINObjReturn = { err: string | false };
 export type cb = (err: string | null, res: any) => void;

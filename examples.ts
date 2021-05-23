@@ -74,7 +74,7 @@ const test = async () => {
     //
     await User.findMany(
       {
-        orderBy: { age: "Desc" },
+        orderBy: { age: "desc" },
         limit: 100,
         skip: 0,
         where: {
@@ -82,12 +82,12 @@ const test = async () => {
           //   { name: { firstName: { $equals: "new name" } }, age: 22 },
           //   { name: { firstName: "test" } },
           // ],
-          name: {
-            lastName: { $in: "name2" },
-          },
+          // name: {
+          //   lastName: { $in: ["name2", "name1"] },
+          // },
           // _id: "78337dae-83d7-420e-b1cc-ac5d0e97d77f",
           posts: { $in: { content: { $equals: "content" } } },
-          // age: { $gt: 0, $lt: 22 },
+          // age: { $gte: 21, $lte: 22 },
           // _id: "bd55048a-e35c-4fdb-8b79-57f81e7ef62f",
         },
       },

@@ -63,12 +63,14 @@ const isValidDoc = (
     return false;
 
   if ("$gt" in queryOptionsObj && doc[key] <= queryOptionsObj.$gt) return false;
-
   if ("$lt" in queryOptionsObj && doc[key] >= queryOptionsObj.$lt) return false;
+  if ("$gte" in queryOptionsObj && doc[key] < queryOptionsObj.$gte)
+    return false;
+  if ("$lte" in queryOptionsObj && doc[key] > queryOptionsObj.$lte)
+    return false;
 
-  if ("$in" in queryOptionsObj) {
-    if (!checkINstatement(doc[key], queryOptionsObj)) return false;
-  }
+  if ("$in" in queryOptionsObj && !checkINstatement(doc[key], queryOptionsObj))
+    return false;
 
   return true;
 };
@@ -91,22 +93,26 @@ const checkINstatement = (
   } else {
     if (!isSearchOptionsObj(queryOptionsObj.$in)) {
       if (!filterData(doc, queryOptionsObj.$in).idxs.size) return false;
-    } else {
-      if (
-        !filterData(
-          doc.map((_: any) => ({ data: _ })),
-          { data: queryOptionsObj.$in }
-        ).idxs.size
-      ) {
-        return false;
-      }
-    }
+    } else if (
+      !filterData(
+        doc.map((_: any) => ({ data: _ })),
+        { data: queryOptionsObj.$in }
+      ).idxs.size
+    )
+      return false;
   }
 
   return true;
 };
 
-const searchOptions: string[] = ["$equals", "$in", "$gt", "$lt"];
+const searchOptions: string[] = [
+  "$equals",
+  "$in",
+  "$gt",
+  "$gte",
+  "$lt",
+  "$lte",
+];
 
 const isSearchOptionsObj = (obj: any): boolean => {
   if (typeof obj !== "object" || !obj) return false;

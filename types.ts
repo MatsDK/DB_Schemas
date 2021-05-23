@@ -70,9 +70,12 @@ export interface updateDocsProps {
   docs: any[];
   uniqueProps: string[];
 }
+
 export interface queryOptionsObj {
   $equals: any;
   $gt: any;
+  $gte: any;
   $lt: any;
+  $lte: any;
   $in: any;
 }
