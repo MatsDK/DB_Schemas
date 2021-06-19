@@ -58,16 +58,23 @@ export interface CollectionDocument {
   [key: string]: any;
 }
 
-export interface searchQuery {
+export type WhereQuery = {
+  $or?: any[];
+  $and?: Array<{ $or: any[] }>;
+  [key: string]: any;
+};
+
+export type returningType = {
+  [key: string]: boolean | returningType;
+};
+
+export type searchQuery = {
   orderBy?: any;
   limit?: number;
   skip?: number;
-  where?: {
-    $or?: any[];
-    $and?: Array<{ $or: any[] }>;
-    [key: string]: any;
-  };
-}
+  returning?: returningType;
+  where?: WhereQuery;
+};
 
 export type checkOrderReturn = { err?: string; newOrder?: any };
 export type checkSearchPropertiesReturn = { err?: string; searchQuery?: any };

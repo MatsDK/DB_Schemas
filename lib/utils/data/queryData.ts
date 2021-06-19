@@ -1,4 +1,9 @@
-import { collectionObj, dataBaseData, optionsType } from "./../../types";
+import {
+  collectionObj,
+  dataBaseData,
+  optionsType,
+  searchQuery,
+} from "./../../types";
 import { connect } from "../connect";
 import { constructDocument } from "../constructDocument";
 import { Document } from "../../Document";
@@ -16,7 +21,7 @@ export const getDataBase = async (
 };
 
 export const findData = async (
-  query: any,
+  query: searchQuery,
   obj: collectionObj,
   options: optionsType
 ): Promise<{ err: string } | Array<any>> => {
@@ -37,7 +42,13 @@ export const findData = async (
   for (let doc of data.docs) {
     const thisDocId = doc._id;
     delete doc._id;
-    const constructedDoc = new Document(doc, obj, options, { complete: false });
+    const constructedDoc = new Document(
+      doc,
+      obj,
+      options,
+      { complete: false },
+      query.returning
+    );
 
     Object.defineProperty(constructedDoc, "_id", {
       value: thisDocId,

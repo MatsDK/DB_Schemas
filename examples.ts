@@ -72,11 +72,13 @@ const test = async () => {
     //   console.log(res);
     // });
     //
+
     await User.findMany(
       {
         orderBy: { age: "desc" },
         limit: 100,
         skip: 0,
+        returning: { name: { firstName: true, lastName: false }, posts: true },
         where: {
           // $or: [
           //   { name: { firstName: { $equals: "new name" } }, age: 22 },

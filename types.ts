@@ -61,7 +61,7 @@ export interface insertProps {
 export interface findDataProps {
   db: string;
   collection: string;
-  query: any;
+  query: searchQuery;
 }
 
 export interface updateDocsProps {
@@ -79,3 +79,21 @@ export interface queryOptionsObj {
   $lte: any;
   $in: any;
 }
+
+export type searchQuery = {
+  orderBy?: any;
+  limit?: number;
+  skip?: number;
+  returning?: returningType;
+  where?: WhereQuery;
+};
+
+export type WhereQuery = {
+  $or?: any[];
+  $and?: Array<{ $or: any[] }>;
+  [key: string]: any;
+};
+
+export type returningType = {
+  [key: string]: boolean | returningType;
+};

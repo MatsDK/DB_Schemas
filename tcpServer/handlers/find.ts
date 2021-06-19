@@ -1,7 +1,12 @@
 import fs from "fs";
 import path from "path";
 import BSON from "bson";
-import { collectionObj, dataBaseData, findDataProps } from "../../types";
+import {
+  collectionObj,
+  dataBaseData,
+  findDataProps,
+  returningType,
+} from "../../types";
 import { filterData } from "./helpers/filterData";
 
 export const findData = async ({ db, collection, query }: findDataProps) => {
@@ -32,11 +37,46 @@ export const findData = async ({ db, collection, query }: findDataProps) => {
       .map((_: number) => thisCollectionData.docs[_]);
 
     validDocs = orderData(query.orderBy, validDocs);
-    return { err: false, docs: validDocs };
+    const returningDocs = setReturnProperties(validDocs, query.returning);
+    return { err: false, docs: returningDocs };
   } catch (err) {
     console.log(err);
     return { err: err.message };
   }
+};
+
+const setReturnProperties = (
+  docs: any[],
+  returningObject: returningType | undefined
+): any[] => {
+  if (typeof returningObject == "undefined") return docs;
+
+  const newDocs = docs.map((_) => {
+    return {
+      ...getPropertiesOfObject(returningObject, _),
+      _id: _._id,
+    };
+  });
+
+  return newDocs;
+};
+
+const getPropertiesOfObject = (returningProps: returningType, doc: any) => {
+  const returnObj: any = {};
+
+  Object.entries(returningProps).forEach(
+    ([key, value]: [string, boolean | returningType]) => {
+      if (typeof value == "boolean") {
+        if ((returnObj[key] = true)) returnObj[key] = doc[key];
+      } else
+        returnObj[key] = getPropertiesOfObject(
+          returningProps[key] as returningType,
+          doc[key]
+        );
+    }
+  );
+
+  return returnObj;
 };
 
 type orderReturn = "asc" | "desc";

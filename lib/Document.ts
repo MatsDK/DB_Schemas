@@ -14,7 +14,8 @@ export class Document implements CollectionDocument {
     obj: any,
     dbObj: collectionObj,
     options: optionsType,
-    properties: any
+    properties: any,
+    returnProps?: any
   ) {
     this.#obj = dbObj;
     this.#options = options;
@@ -33,8 +34,8 @@ export class Document implements CollectionDocument {
 
     if (constructedDoc.err) console.error(constructedDoc.err);
     else {
-      for (let test of Object.keys(constructedDoc)) {
-        this[test] = constructedDoc[test];
+      for (let key of Object.keys(constructedDoc)) {
+        this[key] = constructedDoc[key];
       }
     }
   }
