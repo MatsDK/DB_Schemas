@@ -33,10 +33,8 @@ export const parseSearchQuery = (searchQuery: searchQuery, schema: any) => {
     checkSearchProperties(searchQuery.where);
   if (constructedSearyQuery.err) returnQuery.where = constructedSearyQuery;
 
-  const returningObject = parseReturningPropsObj(
-    searchQuery.returning || {},
-    schema
-  );
+  const returningObject = parseReturningPropsObj(searchQuery.returning, schema);
+  console.log(returningObject);
   returnQuery.returning = returningObject;
 
   returnQuery.where = constructedSearyQuery.searchQuery;
@@ -174,14 +172,17 @@ const checkIfOrderCorrect = (order: any): checkOrderReturn => {
 //   return { err: false };
 // };
 
-const parseReturningPropsObj = (returnObject: returningType, schema: any) => {
+const parseReturningPropsObj = (
+  returnObject: returningType | undefined,
+  schema: any
+) => {
+  if (!returnObject) return undefined;
   let res: any = {};
 
   Object.keys(returnObject).forEach((_: any) => {
     if (typeof returnObject[_] == "boolean") {
-      if (typeof schema[_] !== "undefined" && returnObject[_] == true) {
+      if (typeof schema[_] !== "undefined" && returnObject[_] == true)
         res[_] = returnObject[_];
-      }
     } else if (typeof schema[_] !== "undefined") {
       const recursiveParse = parseReturningPropsObj(
         returnObject[_] as returningType,
@@ -194,11 +195,7 @@ const parseReturningPropsObj = (returnObject: returningType, schema: any) => {
         )
       );
 
-      if (Object.keys(recursiveParse).length)
-        res[_] = {
-          ...recursiveParse,
-          ...res,
-        };
+      if (Object.keys(recursiveParse).length) res[_] = recursiveParse;
     }
   });
 

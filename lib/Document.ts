@@ -1,4 +1,11 @@
-import { collectionObj, CollectionDocument, optionsType } from "./types";
+import { filterData } from "../tcpServer/handlers/helpers/filterData";
+import {
+  collectionObj,
+  CollectionDocument,
+  optionsType,
+  returningType,
+  PropertyType,
+} from "./types";
 import { constructDocument } from "./utils/constructDocument";
 import { insertData, getUniquePropsRecursive } from "./utils/data/insertData";
 import { updateDocs } from "./utils/data/updateDocs";
@@ -26,11 +33,24 @@ export class Document implements CollectionDocument {
       value: this._save,
     });
 
-    const constructedDoc: any = constructDocument(
-      obj,
-      this.#obj.schema.properties,
-      properties.complete
-    );
+    let constructedDoc: any;
+    if (returnProps) {
+      const NewSchemaProperties = filterSchemaProperties(
+        returnProps,
+        this.#obj.schema.properties
+      );
+      constructedDoc = constructDocument(
+        obj,
+        NewSchemaProperties,
+        properties.complete
+      );
+    } else {
+      constructedDoc = constructDocument(
+        obj,
+        this.#obj.schema.properties,
+        properties.complete
+      );
+    }
 
     if (constructedDoc.err) console.error(constructedDoc.err);
     else {
@@ -92,3 +112,36 @@ export class Document implements CollectionDocument {
     }
   }
 }
+const filterSchemaProperties = (
+  returnProps: returningType,
+  schemaProperties: PropertyType[]
+): PropertyType[] => {
+  let returningProperties: Array<PropertyType | undefined> = [];
+
+  Object.entries(returnProps).forEach(
+    ([key, value]: [string, boolean | returningType]) => {
+      if (typeof value == "boolean" && value)
+        returningProperties = [
+          schemaProperties.find((_: PropertyType) => _.name == key) ||
+            undefined,
+          ...returningProperties,
+        ];
+      else {
+        const thisProperty: PropertyType | undefined = schemaProperties.find(
+            (_) => _.name == key
+          ),
+          recursiveProperties = filterSchemaProperties(
+            value as returningType,
+            thisProperty?.properties || []
+          );
+
+        if (recursiveProperties.length && thisProperty) {
+          thisProperty.properties = recursiveProperties as PropertyType[];
+          returningProperties.push(thisProperty);
+        }
+      }
+    }
+  );
+
+  return returningProperties.filter((_) => !!_) as PropertyType[];
+};

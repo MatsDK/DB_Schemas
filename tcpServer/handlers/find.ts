@@ -49,6 +49,7 @@ const setReturnProperties = (
   docs: any[],
   returningObject: returningType | undefined
 ): any[] => {
+  console.log(returningObject);
   if (typeof returningObject == "undefined") return docs;
 
   const newDocs = docs.map((_) => {
@@ -66,18 +67,28 @@ const getPropertiesOfObject = (returningProps: returningType, doc: any) => {
 
   Object.entries(returningProps).forEach(
     ([key, value]: [string, boolean | returningType]) => {
+      if (isArrayInReturnProps(value, doc[key])) {
+        return (returnObj[key] = doc[key].map((_: any) =>
+          getPropertiesOfObject(value as returningType, _)
+        ));
+      }
+
       if (typeof value == "boolean") {
         if ((returnObj[key] = true)) returnObj[key] = doc[key];
-      } else
+      } else {
         returnObj[key] = getPropertiesOfObject(
           returningProps[key] as returningType,
           doc[key]
         );
+      }
     }
   );
 
   return returnObj;
 };
+
+const isArrayInReturnProps = (value: boolean | returningType, doc: any) =>
+  typeof value != "boolean" && typeof doc != "undefined" && Array.isArray(doc);
 
 type orderReturn = "asc" | "desc";
 const orderData = (orderQuery: any, docs: any[]): any[] => {

@@ -75,10 +75,14 @@ const test = async () => {
 
     await User.findMany(
       {
-        orderBy: { age: "desc" },
+        orderBy: { age: "asc" },
         limit: 100,
         skip: 0,
-        returning: { name: { firstName: true, lastName: false }, posts: true },
+        returning: {
+          // age: true,
+          name: { lastName: false, firstName: true },
+          posts: { content: true },
+        },
         where: {
           // $or: [
           //   { name: { firstName: { $equals: "new name" } }, age: 22 },
@@ -94,7 +98,7 @@ const test = async () => {
         },
       },
       (err: any, res: any) => {
-        console.log(res);
+        console.log(res[1]);
         // res[0].age = 22;
         // res[0]._save((err: any, res: any) => {
         //   if (err) return console.error(err);
